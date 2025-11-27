@@ -5,7 +5,7 @@
 **Original Project**: Paltronics PAL-264 "MegaMIC" EGM Emulator
 **Source Language**: Java 8
 **Target Language**: C++17
-**Version**: 15.4.0
+**Version**: 1.0.0
 **Conversion Date**: November 21, 2025
 
 ## Source Locations
@@ -260,7 +260,7 @@ The included demo application demonstrates:
 
 **Sample Output**:
 ```
-EGM Emulator - C++ Version 15.4.0
+EGM Emulator - C++ Version 1.0.0
 ===============================
 Platform: Simulated Platform v1.0 (C++)
 

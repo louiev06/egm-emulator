@@ -16,7 +16,9 @@
       "Bash(./wsl_build.bat --docker-target yocto --build-option sentinel)",
       "Bash(code:*)",
       "Bash(echo:*)",
-      "Bash(xargs sed:*)"
+      "Bash(xargs sed:*)",
+      "Bash(unsquashfs:*)",
+      "Bash(./get-version.sh:*)"
     ],
     "deny": [],
     "ask": []

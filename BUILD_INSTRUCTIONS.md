@@ -183,7 +183,7 @@ For development without Zeus OS hardware, the code includes simulated platform s
 
 ## Version
 
-- **EGM Emulator**: Version 15.4.0
+- **EGM Emulator**: Version 1.0.0
 - **Firmware Version**: 2.0.0 (see `egm-firmware-version`)
 - **C++ Standard**: C++11 (for Zeus OS compatibility)
 

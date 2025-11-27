@@ -8,7 +8,7 @@ The EGM emulator simulates a gaming machine cabinet that communicates with casin
 
 ## Version
 
-- **Version**: 15.4.0
+- **Version**: 1.0.0
 - **Original**: Java 8 implementation
 - **C++ Port**: C++11
 
@@ -410,4 +410,4 @@ This C++ port maintains the same architecture and functionality as the original 
 - **Original Project**: Paltronics PAL-264 "MegaMIC" (Machine Interface Controller)
 - **Protocol**: SAS (Slot Accounting System)
 - **Casino Management System**: OneLink
-- **Version**: 15.4.0 (5.5 series)
+- **Version**: 1.0.0 (5.5 series)

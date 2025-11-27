@@ -2,8 +2,8 @@
 #define VERSION_H
 
 // Auto-incremented build number
-#define BUILD_NUMBER 9
+#define BUILD_NUMBER 12
 
-#define VERSION_STRING "15.4.0"
+#define VERSION_STRING "1.0.0"
 
 #endif // VERSION_H

@@ -94,6 +94,6 @@ fi
 # allow running "bash build-with-docker.sh bash" to get an interactive shell in the container environment
 # (otherwise, we assume arguments should be passed directly to "make")
 if [ "${1:-}" != 'bash' ]; then
-	set -- make -f EGMEmulator.mak "$@"
+	set -- make "$@"
 fi
 exec $dockerRun "${args[@]}" "$DOCKER_IMAGE" bash .docker-entrypoint.sh -- "$@"

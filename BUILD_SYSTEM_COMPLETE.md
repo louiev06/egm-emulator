@@ -192,7 +192,7 @@ tail -f /var/log/sentinel.log
 **Expected output:**
 ```
 EGM Emulator - SAS Slave Device
-Version 15.4.0
+Version 1.0.0
 ===============================
 Platform: Zeus OS
 ...
@@ -346,4 +346,4 @@ These files are no longer needed (were from earlier planning/testing):
 
 **Build System Setup: COMPLETE** ✅
 **Date**: 2025-11-26
-**Version**: 15.4.0
+**Version**: 1.0.0

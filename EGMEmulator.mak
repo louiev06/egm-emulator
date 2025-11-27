@@ -4,7 +4,6 @@ RM=rm
 MKDIR=mkdir
 
 # Increment build number before building
-$(shell bash increment-build.sh 2>/dev/null || true)
 
 # Set ZEUS_OS for Zeus platform builds
 ZEUS_OS=1

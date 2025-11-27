@@ -191,11 +191,11 @@ wsl --distribution %UBUNTU_VERSION% --exec bash -c "cd %WSL_DEST% && export PATH
 :: Clean up log files
 if exist build_output.log del build_output.log
 
-:: Copy sentinel.img back to Windows
+:: Copy sentinel.img back to Windows (from build/dist/)
 echo.
-if exist "%WSL_DEST_WIN%\sentinel.img" (
+if exist "%WSL_DEST_WIN%\build\dist\sentinel.img" (
     echo Copying sentinel.img to Windows...
-    copy "%WSL_DEST_WIN%\sentinel.img" sentinel.img
+    copy "%WSL_DEST_WIN%\build\dist\sentinel.img" sentinel.img
     echo.
     echo ========================================
     echo Build SUCCESS!

@@ -38,7 +38,7 @@ void signalHandler(int signum) {
 
 int main() {
     std::cout << "EGM Emulator - SAS Slave Device" << std::endl;
-    std::cout << "Version " << VERSION_STRING << " (Build #" << BUILD_NUMBER << ")" << std::endl;
+    std::cout << "Version " << VERSION_STRING << "." << BUILD_NUMBER << std::endl;
     std::cout << "===============================" << std::endl;
 
     // Install signal handler for graceful shutdown

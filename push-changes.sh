@@ -136,6 +136,10 @@ sed -i "s/\$(date +\"%Y-%m-%d %H:%M\")/$(date +"%Y-%m-%d %H:%M")/g" PLAN.md
 
 echo "Updated PLAN.md"
 
+# Stage PLAN.md
+git add PLAN.md
+echo "Staged PLAN.md"
+
 # Generate commit message based on staged changes
 echo ""
 echo "Step 2: Analyzing staged changes..."

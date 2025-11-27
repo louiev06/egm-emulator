@@ -1,7 +1,7 @@
 # EGM Emulator - Implementation Status
 
 **Project**: Paltronics MegaMIC EGM Emulator (C++ Port)
-**Version**: 15.4.0
+**Version**: 1.0.0
 **Last Updated**: 2025-11-21
 **Status**: Core Complete, Protocol Implementation In Progress
 
