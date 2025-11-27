@@ -1,7 +1,7 @@
-#include "megamic/sas/BCD.h"
+#include "sas/BCD.h"
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 
 std::vector<uint8_t> BCD::encode(uint64_t value, size_t numBytes) {
@@ -143,4 +143,4 @@ bool BCD::isValidNibble(uint8_t nibble) {
 }
 
 } // namespace sas
-} // namespace megamic
+

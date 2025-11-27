@@ -1,8 +1,8 @@
-#include "megamic/sas/SASCommands.h"
-#include "megamic/sas/CRC16.h"
+#include "sas/SASCommands.h"
+#include "sas/CRC16.h"
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 
 std::vector<uint8_t> Message::serialize() const {
@@ -137,4 +137,4 @@ const char* getCommandName(uint8_t command) {
 }
 
 } // namespace sas
-} // namespace megamic
+

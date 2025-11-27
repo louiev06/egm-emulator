@@ -1,10 +1,10 @@
-#include "megamic/sas/commands/ProgressiveCommands.h"
-#include "megamic/sas/BCD.h"
-#include "megamic/sas/SASConstants.h"
+#include "sas/commands/ProgressiveCommands.h"
+#include "sas/BCD.h"
+#include "sas/SASConstants.h"
 #include <map>
 #include <algorithm>
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -300,4 +300,4 @@ Message ProgressiveCommands::buildProgressiveResponse(uint8_t address,
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

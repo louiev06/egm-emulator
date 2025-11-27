@@ -1,9 +1,9 @@
-#include "megamic/sas/commands/AFTCommands.h"
-#include "megamic/sas/BCD.h"
-#include "megamic/sas/SASConstants.h"
+#include "sas/commands/AFTCommands.h"
+#include "sas/BCD.h"
+#include "sas/SASConstants.h"
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -311,4 +311,4 @@ bool AFTCommands::executeTransferFromMachine(simulator::Machine* machine, uint64
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

@@ -1,8 +1,8 @@
-#include "megamic/io/CommChannel.h"
+#include "io/CommChannel.h"
 #include <algorithm>
 #include <thread>
 
-namespace megamic {
+
 namespace io {
 
 PipedCommChannel::PipedCommChannel(const std::string& name)
@@ -84,4 +84,4 @@ void PipedCommChannel::connectTo(std::shared_ptr<PipedCommChannel> other) {
 }
 
 } // namespace io
-} // namespace megamic
+

@@ -1,6 +1,6 @@
-#include "megamic/sas/commands/ExceptionCommands.h"
+#include "sas/commands/ExceptionCommands.h"
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -94,4 +94,4 @@ Message ExceptionCommands::buildExceptionResponse(uint8_t address, uint8_t excep
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

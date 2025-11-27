@@ -1,5 +1,5 @@
-#include "megamic/io/ZeusPlatform.h"
-#include "megamic/io/ZeusSerialPort.h"
+#include "io/ZeusPlatform.h"
+#include "io/ZeusSerialPort.h"
 #include <cstring>
 #include <sstream>
 
@@ -69,7 +69,7 @@ inline S7_Result S7LITE_RemoteLCD_SetBacklightPWM(UINT brightness) {
 }
 #endif
 
-namespace megamic {
+
 
 ZeusPlatform::ZeusPlatform(bool enableWatchdog, uint32_t watchdogTimeout)
     : initialized_(false),
@@ -366,4 +366,4 @@ bool ZeusPlatform::querySRAMSize() {
     return true;
 }
 
-} // namespace megamic
+

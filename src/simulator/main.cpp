@@ -4,29 +4,29 @@
 #include <chrono>
 #include <csignal>
 #include <atomic>
-#include "megamic/simulator/Machine.h"
-#include "megamic/simulator/Game.h"
-#include "megamic/simulator/MachineEvents.h"
-#include "megamic/event/EventService.h"
-#include "megamic/sas/SASCommPort.h"
-#include "megamic/sas/SASConstants.h"
-#include "megamic/version.h"
+#include "simulator/Machine.h"
+#include "simulator/Game.h"
+#include "simulator/MachineEvents.h"
+#include "event/EventService.h"
+#include "sas/SASCommPort.h"
+#include "sas/SASConstants.h"
+#include "version.h"
 
 #ifdef ZEUS_OS
-#include "megamic/io/ZeusSerialPort.h"
-#include "megamic/io/ZeusPlatform.h"
+#include "io/ZeusSerialPort.h"
+#include "io/ZeusPlatform.h"
 extern "C" {
 #include <s7lite.h>  // For watchdog functions
 }
 #else
-#include "megamic/io/SimulatedPlatform.h"
+#include "io/SimulatedPlatform.h"
 #endif
 
-using namespace megamic;
-using namespace megamic::simulator;
-using namespace megamic::event;
-using namespace megamic::sas;
-using namespace megamic::io;
+
+using namespace simulator;
+using namespace event;
+using namespace sas;
+using namespace io;
 
 // Global flag for graceful shutdown
 std::atomic<bool> g_running(true);

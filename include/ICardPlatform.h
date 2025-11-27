@@ -1,10 +1,10 @@
-#ifndef MEGAMIC_ICARDPLATFORM_H
-#define MEGAMIC_ICARDPLATFORM_H
+#ifndef ICARDPLATFORM_H
+#define ICARDPLATFORM_H
 
 #include <memory>
 #include <string>
 
-namespace megamic {
+
 
 // Forward declarations
 namespace io {
@@ -54,6 +54,6 @@ private:
     int portCounter_;
 };
 
-} // namespace megamic
 
-#endif // MEGAMIC_ICARDPLATFORM_H
+
+#endif // ICARDPLATFORM_H

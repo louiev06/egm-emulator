@@ -1,11 +1,11 @@
-#ifndef MEGAMIC_SAS_COMMANDS_METERCOMMANDS_H
-#define MEGAMIC_SAS_COMMANDS_METERCOMMANDS_H
+#ifndef SAS_COMMANDS_METERCOMMANDS_H
+#define SAS_COMMANDS_METERCOMMANDS_H
 
-#include "megamic/sas/SASCommands.h"
-#include "megamic/simulator/Machine.h"
+#include "sas/SASCommands.h"
+#include "simulator/Machine.h"
 #include <vector>
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -119,6 +119,6 @@ private:
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_COMMANDS_METERCOMMANDS_H
+
+#endif // SAS_COMMANDS_METERCOMMANDS_H

@@ -1,8 +1,8 @@
-#include "megamic/sas/SASDaemon.h"
-#include "megamic/sas/SASCommands.h"
+#include "sas/SASDaemon.h"
+#include "sas/SASCommands.h"
 #include <thread>
 
-namespace megamic {
+
 namespace sas {
 
 SASDaemon::SASDaemon(simulator::Machine* machine, SASCommPort* port)
@@ -332,4 +332,4 @@ void SASDaemon::checkConnection() {
 }
 
 } // namespace sas
-} // namespace megamic
+

@@ -1,7 +1,7 @@
-#include "megamic/sas/CRC16.h"
+#include "sas/CRC16.h"
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 
 // CRC-16 lookup table for polynomial 0x8005
@@ -100,4 +100,4 @@ uint16_t CRC16::extract(const uint8_t* data, size_t length) {
 }
 
 } // namespace sas
-} // namespace megamic
+

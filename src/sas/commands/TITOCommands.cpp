@@ -1,10 +1,10 @@
-#include "megamic/sas/commands/TITOCommands.h"
-#include "megamic/sas/BCD.h"
-#include "megamic/sas/SASConstants.h"
+#include "sas/commands/TITOCommands.h"
+#include "sas/BCD.h"
+#include "sas/SASConstants.h"
 #include <ctime>
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -218,4 +218,4 @@ bool TITOCommands::validateTicketRedemption(const std::vector<uint8_t>& validati
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

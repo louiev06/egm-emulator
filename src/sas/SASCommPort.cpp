@@ -1,16 +1,16 @@
-#include "megamic/sas/SASCommPort.h"
-#include "megamic/sas/CRC16.h"
-#include "megamic/sas/commands/MeterCommands.h"
-#include "megamic/sas/commands/EnableCommands.h"
-#include "megamic/sas/commands/ExceptionCommands.h"
-#include "megamic/sas/commands/DateTimeCommands.h"
-#include "megamic/simulator/Machine.h"
-#include "megamic/sas/commands/TITOCommands.h"
-#include "megamic/sas/commands/AFTCommands.h"
-#include "megamic/sas/commands/ProgressiveCommands.h"
+#include "sas/SASCommPort.h"
+#include "sas/CRC16.h"
+#include "sas/commands/MeterCommands.h"
+#include "sas/commands/EnableCommands.h"
+#include "sas/commands/ExceptionCommands.h"
+#include "sas/commands/DateTimeCommands.h"
+#include "simulator/Machine.h"
+#include "sas/commands/TITOCommands.h"
+#include "sas/commands/AFTCommands.h"
+#include "sas/commands/ProgressiveCommands.h"
 #include <cstring>
 
-namespace megamic {
+
 namespace sas {
 
 SASCommPort::SASCommPort(simulator::Machine* machine,
@@ -404,4 +404,4 @@ bool SASCommPort::sendRaw(const uint8_t* buffer, size_t length) {
 }
 
 } // namespace sas
-} // namespace megamic
+

@@ -1,7 +1,7 @@
-#include "megamic/io/MachineCommPort.h"
+#include "io/MachineCommPort.h"
 #include <chrono>
 
-namespace megamic {
+
 namespace io {
 
 MachineCommPort::MachineCommPort(simulator::Machine* machine, std::shared_ptr<CommChannel> channel)
@@ -36,4 +36,4 @@ uint64_t MachineCommPort::getCurrentTimestamp() {
 }
 
 } // namespace io
-} // namespace megamic
+

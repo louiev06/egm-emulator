@@ -1,10 +1,10 @@
-#ifndef MEGAMIC_SAS_CRC16_H
-#define MEGAMIC_SAS_CRC16_H
+#ifndef SAS_CRC16_H
+#define SAS_CRC16_H
 
 #include <cstdint>
 #include <cstddef>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -71,6 +71,6 @@ private:
 };
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_CRC16_H
+
+#endif // SAS_CRC16_H

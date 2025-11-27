@@ -1,5 +1,5 @@
-#ifndef MEGAMIC_IO_ZEUSSERIALPORT_H
-#define MEGAMIC_IO_ZEUSSERIALPORT_H
+#ifndef IO_ZEUSSERIALPORT_H
+#define IO_ZEUSSERIALPORT_H
 
 #include "CommChannel.h"
 #include <vector>
@@ -10,7 +10,7 @@
 typedef int S7_Result;
 typedef unsigned short USHORT;
 
-namespace megamic {
+
 namespace io {
 
 /**
@@ -114,6 +114,6 @@ private:
 };
 
 } // namespace io
-} // namespace megamic
 
-#endif // MEGAMIC_IO_ZEUSSERIALPORT_H
+
+#endif // IO_ZEUSSERIALPORT_H

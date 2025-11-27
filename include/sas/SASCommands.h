@@ -1,11 +1,11 @@
-#ifndef MEGAMIC_SAS_SASCOMMANDS_H
-#define MEGAMIC_SAS_SASCOMMANDS_H
+#ifndef SAS_SASCOMMANDS_H
+#define SAS_SASCOMMANDS_H
 
 #include <cstdint>
 #include <vector>
 #include <string>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -259,6 +259,6 @@ inline uint8_t makeGeneralPoll(uint8_t address) {
 }
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_SASCOMMANDS_H
+
+#endif // SAS_SASCOMMANDS_H

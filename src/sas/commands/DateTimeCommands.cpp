@@ -1,8 +1,8 @@
-#include "megamic/sas/commands/DateTimeCommands.h"
-#include "megamic/sas/BCD.h"
+#include "sas/commands/DateTimeCommands.h"
+#include "sas/BCD.h"
 #include <ctime>
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -90,4 +90,4 @@ std::vector<uint8_t> DateTimeCommands::getCurrentDateTimeBCD() {
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

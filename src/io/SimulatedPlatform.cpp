@@ -1,8 +1,8 @@
-#include "megamic/ICardPlatform.h"
-#include "megamic/io/CommChannel.h"
+#include "ICardPlatform.h"
+#include "io/CommChannel.h"
 #include <sstream>
 
-namespace megamic {
+
 
 SimulatedPlatform::SimulatedPlatform()
     : portCounter_(0) {
@@ -24,4 +24,4 @@ std::string SimulatedPlatform::getPlatformInfo() const {
     return "Simulated Platform v1.0 (C++)";
 }
 
-} // namespace megamic
+

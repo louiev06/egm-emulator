@@ -1,7 +1,7 @@
-#include "megamic/event/EventService.h"
+#include "event/EventService.h"
 #include <algorithm>
 
-namespace megamic {
+
 namespace event {
 
 void EventService::unsubscribe(int subscriptionId) {
@@ -27,4 +27,4 @@ void EventService::clear() {
 }
 
 } // namespace event
-} // namespace megamic
+

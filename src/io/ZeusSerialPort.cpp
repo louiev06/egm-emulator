@@ -1,4 +1,4 @@
-#include "megamic/io/ZeusSerialPort.h"
+#include "io/ZeusSerialPort.h"
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
@@ -50,7 +50,7 @@ inline S7_Result S7LITE_UART_SetClrRTS(UINT uart, UINT value) {
 }
 #endif
 
-namespace megamic {
+
 namespace io {
 
 ZeusSerialPort::ZeusSerialPort(const std::string& portName)
@@ -337,4 +337,4 @@ bool ZeusSerialPort::checkInitialized() {
 }
 
 } // namespace io
-} // namespace megamic
+

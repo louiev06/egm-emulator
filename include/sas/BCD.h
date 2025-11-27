@@ -1,11 +1,11 @@
-#ifndef MEGAMIC_SAS_BCD_H
-#define MEGAMIC_SAS_BCD_H
+#ifndef SAS_BCD_H
+#define SAS_BCD_H
 
 #include <cstdint>
 #include <cstddef>
 #include <vector>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -94,6 +94,6 @@ private:
 };
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_BCD_H
+
+#endif // SAS_BCD_H

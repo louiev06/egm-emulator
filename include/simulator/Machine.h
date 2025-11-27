@@ -1,5 +1,5 @@
-#ifndef MEGAMIC_SIMULATOR_MACHINE_H
-#define MEGAMIC_SIMULATOR_MACHINE_H
+#ifndef SIMULATOR_MACHINE_H
+#define SIMULATOR_MACHINE_H
 
 #include <cstdint>
 #include <string>
@@ -12,9 +12,9 @@
 #include <thread>
 #include <functional>
 #include "Game.h"
-#include "megamic/event/EventService.h"
+#include "event/EventService.h"
 
-namespace megamic {
+
 
 // Forward declarations from parent namespace
 class ICardPlatform;
@@ -322,6 +322,6 @@ private:
 };
 
 } // namespace simulator
-} // namespace megamic
 
-#endif // MEGAMIC_SIMULATOR_MACHINE_H
+
+#endif // SIMULATOR_MACHINE_H

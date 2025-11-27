@@ -1,10 +1,10 @@
-#ifndef MEGAMIC_SIMULATOR_GAME_H
-#define MEGAMIC_SIMULATOR_GAME_H
+#ifndef SIMULATOR_GAME_H
+#define SIMULATOR_GAME_H
 
 #include <string>
 #include <cstdint>
 
-namespace megamic {
+
 namespace simulator {
 
 /**
@@ -60,6 +60,6 @@ private:
 };
 
 } // namespace simulator
-} // namespace megamic
 
-#endif // MEGAMIC_SIMULATOR_GAME_H
+
+#endif // SIMULATOR_GAME_H

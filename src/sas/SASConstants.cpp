@@ -1,7 +1,7 @@
-#include "megamic/sas/SASConstants.h"
+#include "sas/SASConstants.h"
 #include <cmath>
 
-namespace megamic {
+
 namespace sas {
 
 SASConstants::Denominations::Denominations() {
@@ -86,4 +86,4 @@ constexpr int SASConstants::METER_AFT_IN;
 constexpr int SASConstants::METER_AFT_OUT;
 
 } // namespace sas
-} // namespace megamic
+

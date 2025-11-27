@@ -1,5 +1,5 @@
-#ifndef MEGAMIC_IO_MACHINECOMMPORT_H
-#define MEGAMIC_IO_MACHINECOMMPORT_H
+#ifndef IO_MACHINECOMMPORT_H
+#define IO_MACHINECOMMPORT_H
 
 #include "CommChannel.h"
 #include <memory>
@@ -7,7 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace megamic {
+
 
 // Forward declarations
 namespace simulator {
@@ -116,6 +116,6 @@ protected:
 };
 
 } // namespace io
-} // namespace megamic
 
-#endif // MEGAMIC_IO_MACHINECOMMPORT_H
+
+#endif // IO_MACHINECOMMPORT_H

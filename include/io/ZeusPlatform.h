@@ -1,10 +1,10 @@
-#ifndef MEGAMIC_ZEUSPLATFORM_H
-#define MEGAMIC_ZEUSPLATFORM_H
+#ifndef ZEUSPLATFORM_H
+#define ZEUSPLATFORM_H
 
-#include "megamic/ICardPlatform.h"
+#include "ICardPlatform.h"
 #include <string>
 
-namespace megamic {
+
 
 /**
  * ZeusPlatform - Hardware platform implementation for Zeus OS / Axiomtek S7 Lite
@@ -141,6 +141,6 @@ private:
     bool querySRAMSize();
 };
 
-} // namespace megamic
 
-#endif // MEGAMIC_ZEUSPLATFORM_H
+
+#endif // ZEUSPLATFORM_H

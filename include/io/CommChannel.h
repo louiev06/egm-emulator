@@ -1,12 +1,12 @@
-#ifndef MEGAMIC_IO_COMMCHANNEL_H
-#define MEGAMIC_IO_COMMCHANNEL_H
+#ifndef IO_COMMCHANNEL_H
+#define IO_COMMCHANNEL_H
 
 #include <cstdint>
 #include <vector>
 #include <memory>
 #include <chrono>
 
-namespace megamic {
+
 namespace io {
 
 /**
@@ -93,6 +93,6 @@ private:
 };
 
 } // namespace io
-} // namespace megamic
 
-#endif // MEGAMIC_IO_COMMCHANNEL_H
+
+#endif // IO_COMMCHANNEL_H

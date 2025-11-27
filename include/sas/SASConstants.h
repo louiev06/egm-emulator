@@ -1,10 +1,10 @@
-#ifndef MEGAMIC_SAS_SASCONSTANTS_H
-#define MEGAMIC_SAS_SASCONSTANTS_H
+#ifndef SAS_SASCONSTANTS_H
+#define SAS_SASCONSTANTS_H
 
 #include <cstdint>
 #include <map>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -74,6 +74,6 @@ public:
 };
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_SASCONSTANTS_H
+
+#endif // SAS_SASCONSTANTS_H

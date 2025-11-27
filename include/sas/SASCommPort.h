@@ -1,13 +1,13 @@
-#ifndef MEGAMIC_SAS_SASCOMMPORT_H
-#define MEGAMIC_SAS_SASCOMMPORT_H
+#ifndef SAS_SASCOMMPORT_H
+#define SAS_SASCOMMPORT_H
 
-#include "megamic/io/MachineCommPort.h"
-#include "megamic/sas/SASCommands.h"
+#include "io/MachineCommPort.h"
+#include "sas/SASCommands.h"
 #include <thread>
 #include <atomic>
 #include <vector>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -145,6 +145,6 @@ private:
 };
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_SASCOMMPORT_H
+
+#endif // SAS_SASCOMMPORT_H

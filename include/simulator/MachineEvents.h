@@ -1,11 +1,11 @@
-#ifndef MEGAMIC_SIMULATOR_MACHINEEVENTS_H
-#define MEGAMIC_SIMULATOR_MACHINEEVENTS_H
+#ifndef SIMULATOR_MACHINEEVENTS_H
+#define SIMULATOR_MACHINEEVENTS_H
 
 #include <cstdint>
-#include "megamic/simulator/Game.h"
-#include "megamic/simulator/Machine.h"
+#include "simulator/Game.h"
+#include "simulator/Machine.h"
 
-namespace megamic {
+
 namespace simulator {
 
 /**
@@ -127,6 +127,6 @@ struct GameDelayEvent : public MachineEvent {
 };
 
 } // namespace simulator
-} // namespace megamic
 
-#endif // MEGAMIC_SIMULATOR_MACHINEEVENTS_H
+
+#endif // SIMULATOR_MACHINEEVENTS_H

@@ -1,8 +1,8 @@
-#include "megamic/simulator/Machine.h"
-#include "megamic/simulator/MachineEvents.h"
-#include "megamic/sas/SASConstants.h"
-#include "megamic/sas/SASCommPort.h"
-#include "megamic/ICardPlatform.h"
+#include "simulator/Machine.h"
+#include "simulator/MachineEvents.h"
+#include "sas/SASConstants.h"
+#include "sas/SASCommPort.h"
+#include "ICardPlatform.h"
 #include <algorithm>
 #include <stdexcept>
 #include <sstream>
@@ -11,7 +11,7 @@
 #include <memory>
 #include <set>
 
-namespace megamic {
+
 namespace simulator {
 
 // MachineCommPort base class implementation
@@ -1100,4 +1100,4 @@ bool Machine::hasSAS() const {
 }
 
 } // namespace simulator
-} // namespace megamic
+

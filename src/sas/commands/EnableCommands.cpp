@@ -1,6 +1,6 @@
-#include "megamic/sas/commands/EnableCommands.h"
+#include "sas/commands/EnableCommands.h"
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -64,4 +64,4 @@ Message EnableCommands::buildAckResponse(uint8_t address, uint8_t command) {
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

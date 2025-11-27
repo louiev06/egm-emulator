@@ -1,7 +1,7 @@
-#include "megamic/simulator/Game.h"
-#include "megamic/sas/SASConstants.h"
+#include "simulator/Game.h"
+#include "sas/SASConstants.h"
 
-namespace megamic {
+
 namespace simulator {
 
 Game::Game(int gameNumber, int denomCode, int maxBet,
@@ -29,4 +29,4 @@ void Game::resetCoinInMeter() {
 }
 
 } // namespace simulator
-} // namespace megamic
+

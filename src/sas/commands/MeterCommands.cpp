@@ -1,8 +1,8 @@
-#include "megamic/sas/commands/MeterCommands.h"
-#include "megamic/sas/BCD.h"
-#include "megamic/sas/SASConstants.h"
+#include "sas/commands/MeterCommands.h"
+#include "sas/BCD.h"
+#include "sas/SASConstants.h"
 
-namespace megamic {
+
 namespace sas {
 namespace commands {
 
@@ -192,4 +192,4 @@ Message MeterCommands::buildMultiMeterResponse(uint8_t address, uint8_t command,
 
 } // namespace commands
 } // namespace sas
-} // namespace megamic
+

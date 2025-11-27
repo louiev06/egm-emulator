@@ -15,7 +15,8 @@
       "Bash(DOCKER_SYSTEM_TARGET=yocto cmd.exe /c wsl_build.bat --docker-target yocto --build-option sentinel)",
       "Bash(./wsl_build.bat --docker-target yocto --build-option sentinel)",
       "Bash(code:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(xargs sed:*)"
     ],
     "deny": [],
     "ask": []

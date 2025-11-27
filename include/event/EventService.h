@@ -1,5 +1,5 @@
-#ifndef MEGAMIC_EVENT_EVENTSERVICE_H
-#define MEGAMIC_EVENT_EVENTSERVICE_H
+#ifndef EVENT_EVENTSERVICE_H
+#define EVENT_EVENTSERVICE_H
 
 #include <functional>
 #include <memory>
@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace megamic {
+
 namespace event {
 
 /**
@@ -143,6 +143,6 @@ private:
 };
 
 } // namespace event
-} // namespace megamic
 
-#endif // MEGAMIC_EVENT_EVENTSERVICE_H
+
+#endif // EVENT_EVENTSERVICE_H

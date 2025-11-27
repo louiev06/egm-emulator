@@ -1,14 +1,14 @@
-#ifndef MEGAMIC_SAS_SASDAEMON_H
-#define MEGAMIC_SAS_SASDAEMON_H
+#ifndef SAS_SASDAEMON_H
+#define SAS_SASDAEMON_H
 
-#include "megamic/sas/SASCommPort.h"
-#include "megamic/simulator/Machine.h"
+#include "sas/SASCommPort.h"
+#include "simulator/Machine.h"
 #include <thread>
 #include <atomic>
 #include <chrono>
 #include <memory>
 
-namespace megamic {
+
 namespace sas {
 
 /**
@@ -208,6 +208,6 @@ private:
 };
 
 } // namespace sas
-} // namespace megamic
 
-#endif // MEGAMIC_SAS_SASDAEMON_H
+
+#endif // SAS_SASDAEMON_H
