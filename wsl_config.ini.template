@@ -1,0 +1,11 @@
+# WSL Build Configuration for EGM Emulator
+# Add these lines to your existing C:\.config\wsl.ini file
+# (Keep your existing SOURCE_BASE for nCompass)
+
+# EGM Emulator specific source base (overrides SOURCE_BASE for this project)
+EGM_SOURCE_BASE=C:\_code
+
+# The following should already exist in your wsl.ini:
+# DEST_BASE=\\wsl.localhost\Ubuntu-20.04\home\lou\code
+# WSL_BASE=/home/lou/code
+# UBUNTU_VERSION=Ubuntu-20.04

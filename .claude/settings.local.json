@@ -4,7 +4,18 @@
       "Bash(find:*)",
       "Bash(chmod:*)",
       "Bash(./build.sh:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(yocto-build:*)",
+      "Bash(cat:*)",
+      "Bash(cmd.exe /c wsl_build.bat --docker-target yocto --build-option sentinel)",
+      "Bash(docker run:*)",
+      "Bash(export DOCKER_SYSTEM_TARGET=yocto)",
+      "Bash(./build-with-docker.sh bash -c \"find /opt/fsl-imx-xwayland/5.4-zeus/sysroots -name ''*s7lite*'' 2>/dev/null; ls -la /opt/fsl-imx-xwayland/5.4-zeus/sysroots/cortexa9t2hf-neon-poky-linux-gnueabi/usr/lib/ | grep -i s7 || echo ''No s7lite library found''\")",
+      "Bash(tar:*)",
+      "Bash(DOCKER_SYSTEM_TARGET=yocto cmd.exe /c wsl_build.bat --docker-target yocto --build-option sentinel)",
+      "Bash(./wsl_build.bat --docker-target yocto --build-option sentinel)",
+      "Bash(code:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
