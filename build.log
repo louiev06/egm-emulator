@@ -1,0 +1,3 @@
+EGM_FIRMWARE_VERSION=2.1-zeus-13
+C:\_code\egm-emulator
+./build-with-docker.sh: line 99: exec: docker: not found

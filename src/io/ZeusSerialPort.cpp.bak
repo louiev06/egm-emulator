@@ -53,6 +53,11 @@ inline S7_Result S7LITE_UART_SetClrRTS(UINT uart, UINT value) {
 
 namespace io {
 
+// SAS UART number on Zeus OS
+// Note: UART mapping varies by Zeus hardware configuration
+// Check your platform's UART assignment (typically UART 1 or UART 4)
+constexpr UINT SAS_UART = 1;
+
 ZeusSerialPort::ZeusSerialPort(const std::string& portName)
     : portName_(portName),
       isOpen_(false),
@@ -159,7 +164,7 @@ int ZeusSerialPort::read(uint8_t* buffer, int maxBytes,
     // Set timeout for this read operation
     uint32_t timeoutMs = static_cast<uint32_t>(timeout.count());
     if (timeoutMs != readTimeoutMs_) {
-        S7LITE_UART_SetTimeouts(0, timeoutMs, 0, 0);
+        S7LITE_UART_SetTimeouts(SAS_UART, timeoutMs, 0, 0);
     }
 
     // Prepare Zeus word buffer (16-bit)
@@ -167,11 +172,21 @@ int ZeusSerialPort::read(uint8_t* buffer, int maxBytes,
     UINT numWords = static_cast<UINT>(maxBytes);
 
     // Call Zeus API to read
-    lastError_ = S7LITE_UART_GetBuffer(0, wordBuffer.data(), &numWords);
+    lastError_ = S7LITE_UART_GetBuffer(SAS_UART, wordBuffer.data(), &numWords);
+
+#ifdef ZEUS_OS
+    if (numWords > 0) {
+        std::cout << "[UART" << SAS_UART << " RX] Read " << numWords << " bytes: ";
+        for (UINT i = 0; i < numWords && i < 16; i++) {
+            printf("%02X ", (uint8_t)(wordBuffer[i] & 0xFF));
+        }
+        std::cout << std::endl;
+    }
+#endif
 
     // Restore original timeout if changed
     if (timeoutMs != readTimeoutMs_) {
-        S7LITE_UART_SetTimeouts(0, readTimeoutMs_, 0, 0);
+        S7LITE_UART_SetTimeouts(SAS_UART, readTimeoutMs_, 0, 0);
     }
 
     if (lastError_ != S7DLL_STATUS_OK) {
@@ -204,7 +219,7 @@ int ZeusSerialPort::write(const uint8_t* buffer, int numBytes) {
     std::vector<USHORT> wordBuffer = convertToWords(buffer, numBytes);
 
     // Call Zeus API to send
-    lastError_ = S7LITE_UART_SendBuffer(0, wordBuffer.data(),
+    lastError_ = S7LITE_UART_SendBuffer(SAS_UART, wordBuffer.data(),
                                         static_cast<UINT>(wordBuffer.size()));
 
     if (lastError_ != S7DLL_STATUS_OK) {
@@ -239,7 +254,7 @@ void ZeusSerialPort::configureSAS() {
 
 #ifdef ZEUS_OS
     // Set baud rate to 19200 (SAS standard)
-    S7_Result result = S7LITE_UART_SetBaudRate(0, 19200);
+    S7_Result result = S7LITE_UART_SetBaudRate(SAS_UART, 19200);
     if (result != S7DLL_STATUS_OK) {
         lastError_ = result;
         return;
@@ -248,14 +263,14 @@ void ZeusSerialPort::configureSAS() {
     // Set mode: 9-bit, no parity, 1 stop bit, no flow control
     // S7LITE_UART_SetMode(uart, bits, parity, stopbits, flowcontrol)
     // bits=9 for SAS wake-up mode
-    result = S7LITE_UART_SetMode(0, 9, 0, 0, 0);
+    result = S7LITE_UART_SetMode(SAS_UART, 9, 0, 0, 0);
     if (result != S7DLL_STATUS_OK) {
         lastError_ = result;
         return;
     }
 
     // Set RTS control (1 = clear RTS)
-    result = S7LITE_UART_SetClrRTS(0, 1);
+    result = S7LITE_UART_SetClrRTS(SAS_UART, 1);
     if (result != S7DLL_STATUS_OK) {
         lastError_ = result;
         return;
@@ -270,7 +285,7 @@ bool ZeusSerialPort::setTimeout(uint32_t timeoutMs) {
         return false;
     }
 
-    lastError_ = S7LITE_UART_SetTimeouts(0, timeoutMs, 0, 0);
+    lastError_ = S7LITE_UART_SetTimeouts(SAS_UART, timeoutMs, 0, 0);
     if (lastError_ == S7DLL_STATUS_OK) {
         readTimeoutMs_ = timeoutMs;
         return true;
@@ -298,7 +313,7 @@ bool ZeusSerialPort::clearBuffers(bool clearRx, bool clearTx) {
         return true;  // Nothing to clear
     }
 
-    lastError_ = S7LITE_UART_ClearBuffers(0, mask);
+    lastError_ = S7LITE_UART_ClearBuffers(SAS_UART, mask);
     return (lastError_ == S7DLL_STATUS_OK);
 }
 

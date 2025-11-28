@@ -44,11 +44,12 @@ COMMON_OBJ=$(OUTDIR)/EventService.o \
 	$(OUTDIR)/TITOCommands.o \
 	$(OUTDIR)/AFTCommands.o \
 	$(OUTDIR)/ProgressiveCommands.o \
+	$(OUTDIR)/HTTPServer.o \
 	$(OUTDIR)/main.o
 
 # Platform-specific sources
 ifdef ZEUS_OS
-	COMMON_OBJ += $(OUTDIR)/ZeusSerialPort.o \
+	COMMON_OBJ += $(OUTDIR)/SASSerialPort.o \
 		$(OUTDIR)/ZeusPlatform.o
 else
 	COMMON_OBJ += $(OUTDIR)/SimulatedPlatform.o
@@ -80,6 +81,10 @@ $(OUTDIR)/%.o : src/sas/%.cpp
 
 # Pattern rules for sas/commands directory
 $(OUTDIR)/%.o : src/sas/commands/%.cpp
+	$(COMPILE)
+
+# Pattern rules for http directory
+$(OUTDIR)/%.o : src/http/%.cpp
 	$(COMPILE)
 
 # Build rules

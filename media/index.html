@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=640, height=240, initial-scale=1.0, user-scalable=no">
+    <title>EGM Emulator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with manufacturer and IP -->
+        <div class="header">
+            <div class="ip-address" id="ipAddress">Loading...</div>
+        </div>
+
+        <!-- Main display area -->
+        <div class="main-display">
+            <!-- Credits section -->
+            <div class="credits-section">
+                <div class="label">CREDITS</div>
+                <div class="credits-value" id="credits">0.00</div>
+            </div>
+
+            <!-- Game info and denom -->
+            <div class="game-info">
+                <div class="game-name" id="gameName">Zeus Lightning</div>
+                <div class="denom-display">
+                    <span class="label">DENOM:</span>
+                    <span class="denom-value" id="denomValue">$0.01</span>
+                </div>
+            </div>
+
+            <!-- Win amount -->
+            <div class="win-section">
+                <div class="label">WIN</div>
+                <div class="win-value" id="winAmount">0.00</div>
+            </div>
+        </div>
+
+        <!-- Control buttons -->
+        <div class="controls">
+            <div class="control-row">
+                <button class="btn btn-denom" id="btnDenomDown">DENOM -</button>
+                <button class="btn btn-play" id="btnPlay">PLAY</button>
+                <button class="btn btn-denom" id="btnDenomUp">DENOM +</button>
+            </div>
+            <div class="control-row">
+                <button class="btn btn-cashout" id="btnCashout">CASH OUT</button>
+                <button class="btn btn-small" id="btnException">EXCEPTION</button>
+                <button class="btn btn-small" id="btnBillInsert">BILL INSERT</button>
+            </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar" id="statusBar">Ready</div>
+    </div>
+
+    <!-- Modal for Exception Selection -->
+    <div class="modal" id="exceptionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Exception</h3>
+                <button class="close-btn" id="closeExceptionModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="exception-grid" id="exceptionGrid">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Bill Insert -->
+    <div class="modal" id="billModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Insert Bill</h3>
+                <button class="close-btn" id="closeBillModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="bill-grid">
+                    <button class="bill-btn" data-amount="1">$1</button>
+                    <button class="bill-btn" data-amount="5">$5</button>
+                    <button class="bill-btn" data-amount="10">$10</button>
+                    <button class="bill-btn" data-amount="20">$20</button>
+                    <button class="bill-btn" data-amount="50">$50</button>
+                    <button class="bill-btn" data-amount="100">$100</button>
+                </div>
+                <div class="custom-amount">
+                    <input type="number" id="customBillAmount" placeholder="Custom amount" min="1" step="1">
+                    <button class="btn btn-play" id="btnCustomBill">INSERT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

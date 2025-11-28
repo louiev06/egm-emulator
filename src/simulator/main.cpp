@@ -10,10 +10,11 @@
 #include "event/EventService.h"
 #include "sas/SASCommPort.h"
 #include "sas/SASConstants.h"
+#include "http/HTTPServer.h"
 #include "version.h"
 
 #ifdef ZEUS_OS
-#include "io/ZeusSerialPort.h"
+#include "io/SASSerialPort.h"
 #include "io/ZeusPlatform.h"
 extern "C" {
 #include <s7lite.h>  // For watchdog functions
@@ -67,8 +68,10 @@ int main() {
         auto platform = std::make_shared<ZeusPlatform>();
         std::cout << "Platform: Zeus OS" << std::endl;
 
-        // Create Zeus serial port for SAS communication
-        auto channel = std::make_shared<ZeusSerialPort>("/dev/ttymxc4");
+        // Create SAS serial port using SASSerialPort
+        std::cout << "Opening SAS serial port (UART 1)..." << std::endl;
+        auto channel = std::make_shared<SASSerialPort>();
+        std::cout << "SAS serial port created" << std::endl;
 #else
         // Simulated platform for development
         auto platform = std::make_shared<SimulatedPlatform>();
@@ -84,21 +87,27 @@ int main() {
         // Set up accounting denom (1 cent)
         machine->setAccountingDenomCode(1);
 
-        // Add games
+        // Add games - common slot denominations only
+        // Note: Game configuration will be profile-based in the future
         std::cout << "\nAdding games..." << std::endl;
-        auto game1 = machine->addGame(1, 0.01, 5, "Double Diamond", "DD-001");
+
+        auto game1 = machine->addGame(1, 0.01, 5, "Zeus Lightning", "ZL-001");
         std::cout << "  Game 1: " << game1->getGameName()
                   << " ($" << game1->getDenom() << " denom)" << std::endl;
 
-        auto game2 = machine->addGame(2, 0.25, 3, "Triple Stars", "TS-001");
+        auto game2 = machine->addGame(1, 0.05, 5, "Zeus Lightning", "ZL-001");
         std::cout << "  Game 2: " << game2->getGameName()
                   << " ($" << game2->getDenom() << " denom)" << std::endl;
 
-        auto game3 = machine->addGame(3, 1.00, 10, "Bonus Wheel", "BW-001");
+        auto game3 = machine->addGame(1, 0.25, 5, "Zeus Lightning", "ZL-001");
         std::cout << "  Game 3: " << game3->getGameName()
                   << " ($" << game3->getDenom() << " denom)" << std::endl;
 
-        // Select current game
+        auto game4 = machine->addGame(1, 1.00, 5, "Zeus Lightning", "ZL-001");
+        std::cout << "  Game 4: " << game4->getGameName()
+                  << " ($" << game4->getDenom() << " denom)" << std::endl;
+
+        // Select current game (0.01)
         machine->setCurrentGame(game1);
         std::cout << "\nCurrent game: " << machine->getCurrentGame()->getGameName() << std::endl;
 
@@ -147,6 +156,14 @@ int main() {
         std::cout << "\nMachine started and ready!" << std::endl;
         std::cout << "Machine playable: " << (machine->isPlayable() ? "Yes" : "No") << std::endl;
 
+        // Start HTTP server for web GUI
+        std::cout << "\nStarting HTTP server for GUI..." << std::flush;
+        HTTPServer httpServer(machine.get(), 8080);
+        httpServer.start();
+        std::cout << " Started!" << std::endl;
+        std::cout << "HTTP Server listening on port 8080" << std::endl;
+        std::cout << "GUI URL: http://localhost:8080/index.html" << std::endl;
+
         // Main loop - display statistics periodically
         std::cout << "\n===============================" << std::endl;
         std::cout << "EGM Emulator running..." << std::endl;
@@ -154,6 +171,21 @@ int main() {
         std::cout << "===============================" << std::endl;
 
         auto lastStatsTime = std::chrono::steady_clock::now();
+
+        // Track previous values to only print on change
+        struct {
+            uint64_t messagesReceived = 0;
+            uint64_t messagesSent = 0;
+            uint64_t generalPolls = 0;
+            uint64_t longPolls = 0;
+            uint64_t crcErrors = 0;
+            uint64_t framingErrors = 0;
+            double credits = 0;
+            uint64_t gamesPlayed = 0;
+            int64_t gamesWon = 0;
+            double coinIn = 0;
+            double coinOut = 0;
+        } lastStats;
 
         while (g_running) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -169,21 +201,55 @@ int main() {
 #endif
 
                 auto stats = sasPort->getStatistics();
-                std::cout << "\n--- SAS Statistics ---" << std::endl;
-                std::cout << "Messages Received: " << stats.messagesReceived << std::endl;
-                std::cout << "Messages Sent:     " << stats.messagesSent << std::endl;
-                std::cout << "General Polls:     " << stats.generalPolls << std::endl;
-                std::cout << "Long Polls:        " << stats.longPolls << std::endl;
-                std::cout << "CRC Errors:        " << stats.crcErrors << std::endl;
-                std::cout << "Framing Errors:    " << stats.framingErrors << std::endl;
+                double credits = machine->getCashableAmount();
+                uint64_t gamesPlayed = machine->getGamesPlayed();
+                int64_t gamesWon = machine->getMeter(SASConstants::METER_GAMES_WON);
+                double coinIn = machine->getCoinInMeter();
+                double coinOut = machine->getCoinOutMeter();
 
-                std::cout << "\n--- Machine Status ---" << std::endl;
-                std::cout << "Credits:           $" << machine->getCashableAmount() << std::endl;
-                std::cout << "Games Played:      " << machine->getGamesPlayed() << std::endl;
-                std::cout << "Games Won:         " << machine->getMeter(SASConstants::METER_GAMES_WON) << std::endl;
-                std::cout << "Coin In:           $" << machine->getCoinInMeter() << std::endl;
-                std::cout << "Coin Out:          $" << machine->getCoinOutMeter() << std::endl;
-                std::cout << "---------------------" << std::endl;
+                // Only print if any value has changed
+                bool changed = (stats.messagesReceived != lastStats.messagesReceived ||
+                               stats.messagesSent != lastStats.messagesSent ||
+                               stats.generalPolls != lastStats.generalPolls ||
+                               stats.longPolls != lastStats.longPolls ||
+                               stats.crcErrors != lastStats.crcErrors ||
+                               stats.framingErrors != lastStats.framingErrors ||
+                               credits != lastStats.credits ||
+                               gamesPlayed != lastStats.gamesPlayed ||
+                               gamesWon != lastStats.gamesWon ||
+                               coinIn != lastStats.coinIn ||
+                               coinOut != lastStats.coinOut);
+
+                if (changed) {
+                    std::cout << "\n--- SAS Statistics ---" << std::endl;
+                    std::cout << "Messages Received: " << stats.messagesReceived << std::endl;
+                    std::cout << "Messages Sent:     " << stats.messagesSent << std::endl;
+                    std::cout << "General Polls:     " << stats.generalPolls << std::endl;
+                    std::cout << "Long Polls:        " << stats.longPolls << std::endl;
+                    std::cout << "CRC Errors:        " << stats.crcErrors << std::endl;
+                    std::cout << "Framing Errors:    " << stats.framingErrors << std::endl;
+
+                    std::cout << "\n--- Machine Status ---" << std::endl;
+                    std::cout << "Credits:           $" << credits << std::endl;
+                    std::cout << "Games Played:      " << gamesPlayed << std::endl;
+                    std::cout << "Games Won:         " << gamesWon << std::endl;
+                    std::cout << "Coin In:           $" << coinIn << std::endl;
+                    std::cout << "Coin Out:          $" << coinOut << std::endl;
+                    std::cout << "---------------------" << std::endl;
+
+                    // Update last values
+                    lastStats.messagesReceived = stats.messagesReceived;
+                    lastStats.messagesSent = stats.messagesSent;
+                    lastStats.generalPolls = stats.generalPolls;
+                    lastStats.longPolls = stats.longPolls;
+                    lastStats.crcErrors = stats.crcErrors;
+                    lastStats.framingErrors = stats.framingErrors;
+                    lastStats.credits = credits;
+                    lastStats.gamesPlayed = gamesPlayed;
+                    lastStats.gamesWon = gamesWon;
+                    lastStats.coinIn = coinIn;
+                    lastStats.coinOut = coinOut;
+                }
 
                 lastStatsTime = now;
             }
@@ -191,8 +257,10 @@ int main() {
 
         // Clean shutdown
         std::cout << "\nShutting down..." << std::endl;
+        httpServer.stop();
         sasPort->stop();
         machine->stop();
+        std::cout << "HTTP Server stopped" << std::endl;
         std::cout << "SAS Port stopped" << std::endl;
         std::cout << "Machine stopped" << std::endl;
 

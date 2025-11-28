@@ -1,5 +1,5 @@
 #include "io/ZeusPlatform.h"
-#include "io/ZeusSerialPort.h"
+#include "io/SASSerialPort.h"
 #include <cstring>
 #include <sstream>
 
@@ -141,8 +141,8 @@ std::shared_ptr<io::CommChannel> ZeusPlatform::createSASPort() {
         return sasPort_;
     }
 
-    // Create new Zeus serial port
-    sasPort_ = std::make_shared<io::ZeusSerialPort>("SAS");
+    // Create new SAS serial port (using SASSerialPort)
+    sasPort_ = std::make_shared<io::SASSerialPort>();
 
     // Open the port
     if (!sasPort_->open()) {

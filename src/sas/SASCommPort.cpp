@@ -9,6 +9,7 @@
 #include "sas/commands/AFTCommands.h"
 #include "sas/commands/ProgressiveCommands.h"
 #include <cstring>
+#include <iostream>
 
 
 namespace sas {
@@ -40,14 +41,21 @@ bool SASCommPort::start() {
 
     // Open channel if not already open
     if (!channel_->isOpen()) {
+        std::cout << "[SAS] Opening serial channel..." << std::endl;
         if (!channel_->open()) {
+            std::cout << "[SAS] ERROR: Failed to open serial channel!" << std::endl;
             return false;
         }
+        std::cout << "[SAS] Serial channel opened successfully" << std::endl;
+    } else {
+        std::cout << "[SAS] Serial channel already open" << std::endl;
     }
 
     // Start receive thread
+    std::cout << "[SAS] Starting receive thread..." << std::endl;
     running_ = true;
     receiveThread_ = std::thread(&SASCommPort::receiveThread, this);
+    std::cout << "[SAS] Receive thread started, waiting for data..." << std::endl;
 
     return true;
 }
@@ -115,14 +123,20 @@ void SASCommPort::resetStatistics() {
 }
 
 void SASCommPort::receiveThread() {
+    static int readAttempts = 0;
     while (running_) {
         // Read a message from the channel
         Message msg = readMessage(std::chrono::milliseconds(READ_TIMEOUT_MS));
 
         if (msg.command == 0) {
             // No message or timeout
+            readAttempts++;
+            if (readAttempts % 100 == 0) {
+                std::cout << "[SAS] Waiting for data... (" << readAttempts << " read attempts)" << std::endl;
+            }
             continue;
         }
+        readAttempts = 0;  // Reset counter when we get data
 
         // Check if message is for this address
         if (msg.address != address_ && msg.address != 0) {
@@ -143,11 +157,15 @@ void SASCommPort::receiveThread() {
         }
 
         // Process message and get response
+        std::cout << "[SAS] Processing message..." << std::endl;
         Message response = processMessage(msg);
 
         // Send response if there is one
         if (response.command != 0) {
+            std::cout << "[SAS TX] Sending response, command: 0x" << std::hex << (int)response.command << std::dec << std::endl;
             sendMessage(response);
+        } else {
+            std::cout << "[SAS] No response needed for this message" << std::endl;
         }
     }
 }
@@ -323,65 +341,57 @@ Message SASCommPort::readMessage(std::chrono::milliseconds timeout) {
 
     uint8_t buffer[MAX_MESSAGE_SIZE];
 
-    // Read first byte (address)
-    int bytesRead = channel_->read(buffer, 1, timeout);
-    if (bytesRead != 1) {
-        return msg;  // Timeout or error
-    }
+    // Read with accumulating timeout - SASSerialPort will loop calling GetBuffer
+    // to accumulate all bytes as they arrive over the timeout period
+    int bytesRead = channel_->read(buffer, MAX_MESSAGE_SIZE, timeout);
 
-    msg.address = buffer[0];
-
-    // Read second byte (command)
-    bytesRead = channel_->read(buffer + 1, 1, timeout);
-    if (bytesRead != 1) {
-        std::lock_guard<std::recursive_mutex> lock(statsMutex_);
-        stats_.framingErrors++;
+    if (bytesRead <= 0) {
+        // Timeout or error - no data available
         return msg;
     }
 
+    if (bytesRead < 4) {
+        std::lock_guard<std::recursive_mutex> lock(statsMutex_);
+        stats_.framingErrors++;
+        std::cout << "[SAS] Incomplete message: received only " << bytesRead << " byte(s), need at least 4" << std::endl;
+        return msg;
+    }
+
+    size_t totalBytesRead = static_cast<size_t>(bytesRead);
+
+    // Extract address and command
+    msg.address = buffer[0];
     msg.command = buffer[1];
 
-    // General polls have no data, just 2-byte CRC
-    // Long polls may have data followed by 2-byte CRC
-    // We need to read until we have a valid CRC or timeout
+    std::cout << "[SAS RX] Address: 0x" << std::hex << (int)buffer[0] << std::dec << std::endl;
+    std::cout << "[SAS RX] Command: 0x" << std::hex << (int)buffer[1] << std::dec << std::endl;
 
-    size_t totalBytesRead = 2;  // address + command
-    const size_t MIN_MESSAGE_SIZE = 4;  // addr + cmd + 2-byte CRC
-
-    // Read remaining bytes (data + CRC)
-    // For simplicity, try to read up to MAX_MESSAGE_SIZE
-    // In a real implementation, we'd use message-specific lengths
-    bytesRead = channel_->read(buffer + 2, MAX_MESSAGE_SIZE - 2, timeout);
-
-    if (bytesRead < 2) {
-        // Need at least 2 bytes for CRC
-        std::lock_guard<std::recursive_mutex> lock(statsMutex_);
-        stats_.framingErrors++;
-        return msg;
-    }
-
-    totalBytesRead += bytesRead;
-
-    // Try to parse with minimum message size first
-    size_t messageLength = MIN_MESSAGE_SIZE;  // Start with addr + cmd + CRC
-
-    // For general polls, message is exactly 4 bytes
+    // Determine message length
+    size_t messageLength;
     if (isGeneralPoll(msg.command)) {
+        // General poll is always exactly 4 bytes
         messageLength = 4;
     } else {
-        // For long polls, we need to determine actual length
-        // This would be command-specific in a real implementation
-        // For now, assume the data we read is correct
+        // Long poll - use all bytes we read
         messageLength = totalBytesRead;
     }
 
     // Verify CRC
+    std::cout << "[SAS RX] Message length: " << messageLength << " bytes, verifying CRC..." << std::endl;
+    std::cout << "[SAS RX] Message bytes: ";
+    for (size_t i = 0; i < messageLength; i++) {
+        printf("%02X ", buffer[i]);
+    }
+    std::cout << std::endl;
+
     if (!CRC16::verify(buffer, messageLength)) {
         std::lock_guard<std::recursive_mutex> lock(statsMutex_);
         stats_.crcErrors++;
         msg.command = 0;  // Invalidate message
+        std::cout << "[SAS] CRC error!" << std::endl;
         return msg;
     }
+    std::cout << "[SAS RX] CRC OK!" << std::endl;
 
     // Extract data (if any)
     if (messageLength > 4) {

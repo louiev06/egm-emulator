@@ -1,0 +1,429 @@
+/* EGM Emulator Kiosk Display - 640x240 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 640px;
+    height: 240px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header - 30px height */
+.header {
+    height: 30px;
+    background: linear-gradient(to bottom, #0f3460, #16213e);
+    border-bottom: 2px solid #e94560;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.manufacturer {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.ip-address {
+    font-size: 10px;
+    color: #888;
+    font-family: 'Courier New', monospace;
+}
+
+/* Main display - 140px height */
+.main-display {
+    height: 140px;
+    display: flex;
+    padding: 8px;
+    gap: 8px;
+}
+
+/* Credits section - takes most space */
+.credits-section {
+    flex: 2;
+    background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+    border: 3px solid #ffd700;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.credits-section .label {
+    font-size: 14px;
+    color: #ffd700;
+    margin-bottom: 5px;
+    letter-spacing: 2px;
+}
+
+.credits-value {
+    font-size: 48px;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-family: 'Courier New', monospace;
+}
+
+/* Right side - game info and win */
+.game-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.game-name {
+    background: linear-gradient(135deg, #e94560 0%, #c7324f 100%);
+    border: 2px solid #fff;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.denom-display {
+    background: #0f3460;
+    border: 2px solid #ffd700;
+    border-radius: 6px;
+    padding: 6px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.denom-display .label {
+    font-size: 10px;
+    color: #ffd700;
+}
+
+.denom-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    margin-top: 2px;
+}
+
+.win-section {
+    flex: 1;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    border: 3px solid #e94560;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+}
+
+.win-section .label {
+    font-size: 12px;
+    color: #e94560;
+    margin-bottom: 3px;
+    letter-spacing: 2px;
+}
+
+.win-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+    font-family: 'Courier New', monospace;
+}
+
+/* Controls - 50px height */
+.controls {
+    height: 50px;
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.control-row {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.btn {
+    flex: 1;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn-play {
+    background: linear-gradient(to bottom, #4caf50, #45a049);
+    color: white;
+    font-size: 16px;
+}
+
+.btn-play:hover {
+    background: linear-gradient(to bottom, #5bc05f, #4caf50);
+}
+
+.btn-play:disabled {
+    background: linear-gradient(to bottom, #666, #555);
+    cursor: not-allowed;
+}
+
+.btn-denom {
+    background: linear-gradient(to bottom, #2196f3, #1976d2);
+    color: white;
+}
+
+.btn-denom:hover {
+    background: linear-gradient(to bottom, #42a5f5, #2196f3);
+}
+
+.btn-cashout {
+    background: linear-gradient(to bottom, #ffd700, #daa520);
+    color: #000;
+}
+
+.btn-cashout:hover {
+    background: linear-gradient(to bottom, #ffed4e, #ffd700);
+}
+
+.btn-tilt {
+    background: linear-gradient(to bottom, #f44336, #d32f2f);
+    color: white;
+    font-size: 10px;
+}
+
+.btn-tilt:hover {
+    background: linear-gradient(to bottom, #ef5350, #f44336);
+}
+
+.btn-small {
+    background: linear-gradient(to bottom, #ff9800, #f57c00);
+    color: white;
+    font-size: 10px;
+}
+
+.btn-small:hover {
+    background: linear-gradient(to bottom, #ffa726, #ff9800);
+}
+
+/* Status bar - 20px height */
+.status-bar {
+    height: 20px;
+    background: #000;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+}
+
+/* Win animation */
+@keyframes winPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.win-animation {
+    animation: winPulse 0.5s ease-in-out 3;
+}
+
+/* Flashing effect for wins */
+.flash {
+    animation: flash 0.3s ease-in-out 5;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 640px;
+    height: 240px;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 3px solid #ffd700;
+    border-radius: 8px;
+    width: 500px;
+    max-height: 200px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.modal-header {
+    background: linear-gradient(to bottom, #0f3460, #16213e);
+    border-bottom: 2px solid #ffd700;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #ffd700;
+}
+
+.close-btn {
+    background: #e94560;
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+.close-btn:hover {
+    background: #ff6b6b;
+}
+
+.modal-body {
+    padding: 10px;
+    max-height: 140px;
+    overflow-y: auto;
+}
+
+/* Exception grid */
+.exception-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.exception-btn {
+    background: linear-gradient(to bottom, #f44336, #d32f2f);
+    color: white;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-align: left;
+}
+
+.exception-btn:hover {
+    background: linear-gradient(to bottom, #ef5350, #f44336);
+    transform: scale(1.05);
+}
+
+.exception-btn:active {
+    transform: scale(0.95);
+}
+
+.exception-code {
+    font-weight: bold;
+    display: block;
+    font-size: 11px;
+}
+
+.exception-name {
+    font-size: 8px;
+    opacity: 0.9;
+}
+
+/* Bill grid */
+.bill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.bill-btn {
+    background: linear-gradient(to bottom, #4caf50, #45a049);
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.bill-btn:hover {
+    background: linear-gradient(to bottom, #5bc05f, #4caf50);
+    transform: scale(1.05);
+}
+
+.bill-btn:active {
+    transform: scale(0.95);
+}
+
+.custom-amount {
+    display: flex;
+    gap: 6px;
+}
+
+.custom-amount input {
+    flex: 1;
+    padding: 8px;
+    font-size: 14px;
+    border: 2px solid #ffd700;
+    border-radius: 4px;
+    background: #0f3460;
+    color: #fff;
+}
+
+.custom-amount button {
+    width: 80px;
+}

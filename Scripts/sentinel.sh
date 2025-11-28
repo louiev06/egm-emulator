@@ -73,10 +73,16 @@ case "$1" in
 		seconds=$(awk '{print $1}' /proc/uptime)
         echo "Starting Sentinel exe (uptime $seconds seconds)"
 		./Sentinel > /var/log/sentinel.log 2>&1 &
+
+		# Launch Chrome GUI in kiosk mode (waits for HTTP server to be ready)
+		echo "Launching Chrome GUI..."
+		./launchchrome.sh &
 	;;
 
 	stop)
 		pkill Sentinel
+		cd /opt/ncompass/bin
+		./killchrome.sh
 	;;
 
 	restart)
