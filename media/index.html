@@ -8,29 +8,20 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header with manufacturer and IP -->
-        <div class="header">
-            <div class="ip-address" id="ipAddress">Loading...</div>
-        </div>
-
-        <!-- Main display area -->
+        <!-- Compact display area - all info in one row -->
         <div class="main-display">
-            <!-- Credits section -->
+            <div class="game-name" id="gameName">Zeus Lightning</div>
+
             <div class="credits-section">
                 <div class="label">CREDITS</div>
                 <div class="credits-value" id="credits">0.00</div>
             </div>
 
-            <!-- Game info and denom -->
-            <div class="game-info">
-                <div class="game-name" id="gameName">Zeus Lightning</div>
-                <div class="denom-display">
-                    <span class="label">DENOM:</span>
-                    <span class="denom-value" id="denomValue">$0.01</span>
-                </div>
+            <div class="denom-display">
+                <span class="label">DENOM</span>
+                <span class="denom-value" id="denomValue">$0.01</span>
             </div>
 
-            <!-- Win amount -->
             <div class="win-section">
                 <div class="label">WIN</div>
                 <div class="win-value" id="winAmount">0.00</div>
@@ -46,13 +37,23 @@
             </div>
             <div class="control-row">
                 <button class="btn btn-cashout" id="btnCashout">CASH OUT</button>
-                <button class="btn btn-small" id="btnException">EXCEPTION</button>
-                <button class="btn btn-small" id="btnBillInsert">BILL INSERT</button>
+                <button class="btn btn-medium" id="btnException">EXCEPTION</button>
+            </div>
+            <div class="control-row">
+                <button class="btn btn-medium" id="btnBillInsert">BILL INSERT</button>
+                <button class="btn btn-tbd" id="btnTBD1" disabled>TBD</button>
+            </div>
+            <div class="control-row">
+                <button class="btn btn-tbd" id="btnTBD2" disabled>TBD</button>
+                <button class="btn btn-medium" id="btnReboot">REBOOT</button>
             </div>
         </div>
 
-        <!-- Status bar -->
-        <div class="status-bar" id="statusBar">Ready</div>
+        <!-- Status bar with IP -->
+        <div class="status-bar">
+            <span id="statusBar">Ready</span>
+            <span class="ip-address" id="ipAddress">Loading...</span>
+        </div>
     </div>
 
     <!-- Modal for Exception Selection -->
@@ -89,6 +90,28 @@
                 <div class="custom-amount">
                     <input type="number" id="customBillAmount" placeholder="Custom amount" min="1" step="1">
                     <button class="btn btn-play" id="btnCustomBill">INSERT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Reboot Confirmation -->
+    <div class="modal" id="rebootModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reboot Confirmation</h3>
+                <button class="close-btn" id="closeRebootModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 18px; margin: 20px 0;">
+                    Are you sure you want to reboot the system?
+                </p>
+                <p style="text-align: center; font-size: 14px; color: #888; margin-bottom: 20px;">
+                    Meters will be saved before rebooting.
+                </p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn btn-cashout" id="btnCancelReboot">CANCEL</button>
+                    <button class="btn btn-reboot" id="btnConfirmReboot">REBOOT</button>
                 </div>
             </div>
         </div>

@@ -1,6 +1,8 @@
 #include "sas/SASCommands.h"
 #include "sas/CRC16.h"
+#include "utils/Logger.h"
 #include <cstring>
+#include <sstream>
 
 
 namespace sas {
@@ -20,6 +22,20 @@ std::vector<uint8_t> Message::serialize() const {
     uint16_t calculatedCrc = CRC16::calculate(buffer.data(), buffer.size());
     buffer.push_back(static_cast<uint8_t>(calculatedCrc & 0xFF));        // LSB
     buffer.push_back(static_cast<uint8_t>(calculatedCrc >> 8));          // MSB
+
+    // Debug log the serialized message
+    std::stringstream ss;
+    ss << "[serialize] addr=0x" << std::hex << (int)address
+       << " cmd=0x" << (int)command
+       << " data_size=" << std::dec << data.size()
+       << " total=" << buffer.size() << " bytes: ";
+    for (size_t i = 0; i < buffer.size() && i < 32; i++) {
+        char hex[4];
+        snprintf(hex, sizeof(hex), "%02X ", buffer[i]);
+        ss << hex;
+    }
+    if (buffer.size() > 32) ss << "...";
+    utils::Logger::log(ss.str());
 
     return buffer;
 }
@@ -100,7 +116,6 @@ const char* getCommandName(uint8_t command) {
         // Progressive
         case LongPoll::SEND_PROGRESSIVE_WIN:        return "Send Progressive Win";
         case LongPoll::SEND_PROGRESSIVE_LEVELS:     return "Send Progressive Levels";
-        case LongPoll::SEND_MULTIPLE_PROGRESSIVE_LEVELS: return "Send Multiple Progressive Levels";
 
         // Real-Time Events
         case LongPoll::ENABLE_REAL_TIME_EVENTS:     return "Enable Real-Time Events";
@@ -112,7 +127,12 @@ const char* getCommandName(uint8_t command) {
 
         // Date/Time
         case LongPoll::SEND_DATE_TIME:              return "Send Date/Time";
-        case LongPoll::SET_DATE_TIME:               return "Set Date/Time";
+
+        // Additional Meters
+        case LongPoll::SEND_TOTAL_BILLS:            return "Send Total Bills";
+
+        // Machine ID
+        case LongPoll::SEND_MACHINE_ID_AND_SERIAL:  return "Send Machine ID and Serial Number";
 
         // Credits
         case LongPoll::SEND_CASHABLE_AMOUNT:        return "Send Cashable Amount";

@@ -34,7 +34,7 @@ Message DateTimeCommands::handleSetDateTime(simulator::Machine* machine,
 
     Message response;
     response.address = 1;
-    response.command = LongPoll::SET_DATE_TIME;
+    response.command = LongPoll::SEND_DATE_TIME;  // Use SEND_DATE_TIME (no SET command exists)
     // No data - just ACK
 
     return response;

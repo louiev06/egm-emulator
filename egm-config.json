@@ -1,0 +1,76 @@
+{
+  "machineInfo": {
+    "assetNumber": 1000000,
+    "serialNumber": "000001",
+    "sasVersion": "602",
+    "denomination": 0.01,
+    "maxBet": 100
+  },
+  "aft": {
+    "enabled": true,
+    "hostCashoutStatus": 1,
+    "aftStatusFlags": 177,
+    "maxBufferIndex": 100,
+    "transferLimit": 100000,
+    "restrictedPoolID": 0
+  },
+  "capabilities": {
+    "jackpotMultiplier": true,
+    "aftBonusAwards": true,
+    "legacyBonusAwards": true,
+    "tournament": false,
+    "validationExtensions": true,
+    "validationStyle": 2,
+    "ticketRedemption": true,
+    "meterModel": 1,
+    "ticketsToTotalDrop": true,
+    "extendedMeters": true,
+    "componentAuthentication": false,
+    "multiDenomExtensions": true,
+    "maximumPollingRate40ms": true,
+    "multiLevelProgressive": true,
+    "multipleSASProgressiveWinReporting": false
+  },
+  "games": [
+    {
+      "gameNumber": 1,
+      "gameID": "ZL-001",
+      "enabled": true,
+      "denomination": 0.01,
+      "maxBet": 5,
+      "gameName": "Zeus Lightning",
+      "payTableID": "      ",
+      "basePercent": 9500
+    },
+    {
+      "gameNumber": 2,
+      "gameID": "ZL-001",
+      "enabled": true,
+      "denomination": 0.05,
+      "maxBet": 5,
+      "gameName": "Zeus Lightning",
+      "payTableID": "      ",
+      "basePercent": 9500
+    },
+    {
+      "gameNumber": 3,
+      "gameID": "ZL-001",
+      "enabled": true,
+      "denomination": 0.25,
+      "maxBet": 5,
+      "gameName": "Zeus Lightning",
+      "payTableID": "      ",
+      "basePercent": 9500
+    },
+    {
+      "gameNumber": 4,
+      "gameID": "ZL-001",
+      "enabled": true,
+      "denomination": 1.00,
+      "maxBet": 5,
+      "gameName": "Zeus Lightning",
+      "payTableID": "      ",
+      "basePercent": 9500
+    }
+  ]
+}

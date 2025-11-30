@@ -51,3 +51,6 @@ vcpkg/
 sentinel.img
 package.json
 copy.log
+src/polls/*
+Release/EGMEmulator
+Release/EGMEmulator

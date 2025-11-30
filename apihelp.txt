@@ -1,0 +1,163 @@
+===============================================================================
+EGM EMULATOR - API REFERENCE
+===============================================================================
+
+Base URL: http://localhost:8080
+Remote:   http://<machine-ip>:8080
+
+-------------------------------------------------------------------------------
+GET ENDPOINTS
+-------------------------------------------------------------------------------
+
+1. GET /api/status
+   Description: Get current machine status (credits, denom, game name)
+   Example:
+     curl http://localhost:8080/api/status
+
+2. GET /api/ip
+   Description: Get machine IP address
+   Example:
+     curl http://localhost:8080/api/ip
+
+3. GET /api/denoms
+   Description: Get list of available game denominations
+   Example:
+     curl http://localhost:8080/api/denoms
+
+4. GET /api/exceptions
+   Description: Get list of available SAS exceptions
+   Example:
+     curl http://localhost:8080/api/exceptions
+
+5. GET /api/meters
+   Description: Get ALL live meter values (doors, bills, credits, AFT, etc.)
+   Example:
+     curl http://localhost:8080/api/meters
+
+-------------------------------------------------------------------------------
+POST ENDPOINTS
+-------------------------------------------------------------------------------
+
+6. POST /api/play
+   Description: Play one game (deducts bet, simulates win/loss)
+   Example:
+     curl -X POST http://localhost:8080/api/play
+
+7. POST /api/cashout
+   Description: Cash out current credits
+   Example:
+     curl -X POST http://localhost:8080/api/cashout
+
+8. POST /api/denom
+   Description: Change game denomination
+   Body: {"denom": <value>}
+   Examples:
+     curl -X POST http://localhost:8080/api/denom -H "Content-Type: application/json" -d '{"denom":0.01}'
+     curl -X POST http://localhost:8080/api/denom -H "Content-Type: application/json" -d '{"denom":0.25}'
+     curl -X POST http://localhost:8080/api/denom -H "Content-Type: application/json" -d '{"denom":1.00}'
+
+9. POST /api/exception
+   Description: Set/clear SAS exception
+   Body: {"code": <exception_code>, "set": <true|false>}
+   Examples:
+     curl -X POST http://localhost:8080/api/exception -H "Content-Type: application/json" -d '{"code":11,"set":true}'
+     curl -X POST http://localhost:8080/api/exception -H "Content-Type: application/json" -d '{"code":11,"set":false}'
+
+   Common Exception Codes:
+     11 = Slot Door Open
+     12 = Drop Door Open
+     13 = Logic Door Open
+     14 = Cash Door Open
+     25 = Printer Failure
+     26 = Printer Paper Out
+     32 = RAM Error
+     33 = Low Battery
+     64 = Handpay Pending
+     81 = Game Tilt
+     82 = Power Off/On
+
+10. POST /api/billinsert
+    Description: Insert bill (adds credits)
+    Body: {"amount": <dollar_amount>}
+    Examples:
+      curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":1}'
+      curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":5}'
+      curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":10}'
+      curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":20}'
+      curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":100}'
+
+11. POST /api/reboot
+    Description: Save meters and reboot the machine
+    Example:
+      curl -X POST http://localhost:8080/api/reboot
+
+    Alternative with wget:
+      wget --post-data='' http://localhost:8080/api/reboot
+
+-------------------------------------------------------------------------------
+STATIC FILES
+-------------------------------------------------------------------------------
+
+12. GET /index.html
+    Description: Web GUI interface
+    Example:
+      http://localhost:8080/index.html
+
+13. GET /media/*
+    Description: Static media files (CSS, JS, images)
+
+-------------------------------------------------------------------------------
+COMMON WORKFLOWS
+-------------------------------------------------------------------------------
+
+# Insert $20 bill, play 5 games, then cashout:
+curl -X POST http://localhost:8080/api/billinsert -H "Content-Type: application/json" -d '{"amount":20}'
+curl -X POST http://localhost:8080/api/play
+curl -X POST http://localhost:8080/api/play
+curl -X POST http://localhost:8080/api/play
+curl -X POST http://localhost:8080/api/play
+curl -X POST http://localhost:8080/api/play
+curl -X POST http://localhost:8080/api/cashout
+
+# Check status and meters:
+curl http://localhost:8080/api/status
+curl http://localhost:8080/api/meters
+
+# Open/close slot door exception:
+curl -X POST http://localhost:8080/api/exception -H "Content-Type: application/json" -d '{"code":11,"set":true}'
+curl -X POST http://localhost:8080/api/exception -H "Content-Type: application/json" -d '{"code":11,"set":false}'
+
+# Change denom and check available denoms:
+curl http://localhost:8080/api/denoms
+curl -X POST http://localhost:8080/api/denom -H "Content-Type: application/json" -d '{"denom":0.25}'
+
+# Save meters and reboot:
+curl -X POST http://localhost:8080/api/reboot
+
+-------------------------------------------------------------------------------
+METER PERSISTENCE
+-------------------------------------------------------------------------------
+
+Meters are automatically:
+  - Loaded from /sdboot/meters.json on startup (falls back to meters.json)
+  - Saved to /sdboot/meters.json on reboot or shutdown
+  - Persist across reboots
+
+View saved meters:
+  cat /sdboot/meters.json
+
+View live meters:
+  curl http://localhost:8080/api/meters
+
+-------------------------------------------------------------------------------
+NOTES
+-------------------------------------------------------------------------------
+
+- All POST endpoints accept JSON in the request body
+- Use Content-Type: application/json header for POST requests
+- The GUI is available at http://<machine-ip>:8080/index.html
+- SSH into machine and use localhost:8080 for local testing
+- Use machine IP for remote access from other devices
+- Meters persist across reboots when saved to /sdboot/
+
+===============================================================================

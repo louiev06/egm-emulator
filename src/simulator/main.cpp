@@ -11,6 +11,8 @@
 #include "sas/SASCommPort.h"
 #include "sas/SASConstants.h"
 #include "http/HTTPServer.h"
+#include "config/EGMConfig.h"
+#include "config/MeterPersistence.h"
 #include "version.h"
 
 #ifdef ZEUS_OS
@@ -41,6 +43,12 @@ int main() {
     std::cout << "EGM Emulator - SAS Slave Device" << std::endl;
     std::cout << "Version " << VERSION_STRING << "." << BUILD_NUMBER << std::endl;
     std::cout << "===============================" << std::endl;
+
+    // Load configuration from egm-config.json
+    std::cout << "Loading configuration..." << std::endl;
+    if (!config::EGMConfig::load("egm-config.json")) {
+        std::cout << "Warning: Could not load egm-config.json, using defaults" << std::endl;
+    }
 
     // Install signal handler for graceful shutdown
     std::signal(SIGINT, signalHandler);
@@ -84,32 +92,55 @@ int main() {
         // Create machine
         auto machine = std::make_shared<Machine>(eventService, platform);
 
+        // Load meters from persistent storage
+        std::cout << "Loading persistent meters..." << std::endl;
+        config::MeterPersistence::loadMeters(machine.get());
+
         // Set up accounting denom (1 cent)
         machine->setAccountingDenomCode(1);
 
-        // Add games - common slot denominations only
-        // Note: Game configuration will be profile-based in the future
-        std::cout << "\nAdding games..." << std::endl;
+        // Add games from configuration
+        std::cout << "\nAdding games from configuration..." << std::endl;
+        std::shared_ptr<Game> firstGame = nullptr;
 
-        auto game1 = machine->addGame(1, 0.01, 5, "Zeus Lightning", "ZL-001");
-        std::cout << "  Game 1: " << game1->getGameName()
-                  << " ($" << game1->getDenom() << " denom)" << std::endl;
+        auto doc = config::EGMConfig::getDocument();
+        if (doc && doc->HasMember("games") && (*doc)["games"].IsArray()) {
+            const auto& gamesArray = (*doc)["games"];
 
-        auto game2 = machine->addGame(1, 0.05, 5, "Zeus Lightning", "ZL-001");
-        std::cout << "  Game 2: " << game2->getGameName()
-                  << " ($" << game2->getDenom() << " denom)" << std::endl;
+            for (rapidjson::SizeType i = 0; i < gamesArray.Size(); i++) {
+                const auto& gameConfig = gamesArray[i];
 
-        auto game3 = machine->addGame(1, 0.25, 5, "Zeus Lightning", "ZL-001");
-        std::cout << "  Game 3: " << game3->getGameName()
-                  << " ($" << game3->getDenom() << " denom)" << std::endl;
+                // Check if game is enabled (default to true if not specified)
+                bool enabled = !gameConfig.HasMember("enabled") || gameConfig["enabled"].GetBool();
+                if (!enabled) {
+                    continue;
+                }
 
-        auto game4 = machine->addGame(1, 1.00, 5, "Zeus Lightning", "ZL-001");
-        std::cout << "  Game 4: " << game4->getGameName()
-                  << " ($" << game4->getDenom() << " denom)" << std::endl;
+                // Read game configuration
+                int gameNumber = gameConfig["gameNumber"].GetInt();
+                double denom = gameConfig["denomination"].GetDouble();
+                int maxBet = gameConfig["maxBet"].GetInt();
+                std::string gameName = gameConfig.HasMember("gameName") ?
+                    gameConfig["gameName"].GetString() : "Slot Game";
+                std::string gameID = gameConfig["gameID"].GetString();
 
-        // Select current game (0.01)
-        machine->setCurrentGame(game1);
-        std::cout << "\nCurrent game: " << machine->getCurrentGame()->getGameName() << std::endl;
+                // Add the game
+                auto game = machine->addGame(gameNumber, denom, maxBet, gameName, gameID);
+                std::cout << "  Game " << gameNumber << ": " << game->getGameName()
+                          << " ($" << game->getDenom() << " denom)" << std::endl;
+
+                // Remember first game for default selection
+                if (!firstGame) {
+                    firstGame = game;
+                }
+            }
+        }
+
+        // Select first game as current game
+        if (firstGame) {
+            machine->setCurrentGame(firstGame);
+            std::cout << "\nCurrent game: " << machine->getCurrentGame()->getGameName() << std::endl;
+        }
 
         // Add progressive levels
         std::cout << "\nAdding progressive levels..." << std::endl;
@@ -257,6 +288,11 @@ int main() {
 
         // Clean shutdown
         std::cout << "\nShutting down..." << std::endl;
+
+        // Save meters to persistent storage before shutdown
+        std::cout << "Saving persistent meters..." << std::endl;
+        config::MeterPersistence::saveMeters(machine.get());
+
         httpServer.stop();
         sasPort->stop();
         machine->stop();

@@ -50,6 +50,7 @@ set(COMMON_SOURCES
     src/sas/commands/EnableCommands.cpp
     src/sas/commands/ExceptionCommands.cpp
     src/sas/commands/DateTimeCommands.cpp
+    src/sas/commands/ConfigCommands.cpp
     src/sas/commands/TITOCommands.cpp
     src/sas/commands/AFTCommands.cpp
     src/sas/commands/ProgressiveCommands.cpp

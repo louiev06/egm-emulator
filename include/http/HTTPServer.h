@@ -50,11 +50,13 @@ private:
     std::string handleGET_IP();
     std::string handleGET_Denoms();
     std::string handleGET_Exceptions();
+    std::string handleGET_Meters();
     std::string handlePOST_Play(const std::string& body);
     std::string handlePOST_Cashout(const std::string& body);
     std::string handlePOST_Denom(const std::string& body);
     std::string handlePOST_Exception(const std::string& body);
     std::string handlePOST_BillInsert(const std::string& body);
+    std::string handlePOST_Reboot(const std::string& body);
 
     // Static file serving
     std::string handleStaticFile(const std::string& path);

@@ -113,7 +113,7 @@ void Machine::initializeMeters() {
     machineMeters_[SASConstants::METER_TOT_TKT_IN] = 0;
     machineMeters_[SASConstants::METER_TOT_TKT_OUT] = 0;
     machineMeters_[SASConstants::METER_TOT_DROP] = 0;
-    machineMeters_[SASConstants::METER_REG_CASH_TKT_IN] = 0;
+    machineMeters_[SASConstants::METER_REG_CASHABLE_TKT_IN] = 0;
     machineMeters_[SASConstants::METER_REST_PROMO_TKT_IN] = 0;
     machineMeters_[SASConstants::METER_1_BILLS_ACCEPTED] = 0;
     machineMeters_[SASConstants::METER_5_BILLS_ACCEPTED] = 0;
@@ -315,7 +315,7 @@ void Machine::addRestrictedCredits(double dollarAmount) {
 }
 
 int64_t Machine::getNonRestrictedCredits() const {
-    return getMeter(sas::SASConstants::METER_CURRENT_NON_REST_CRD);
+    return getMeter(sas::SASConstants::METER_TOTAL_NONREST_PLAYED);
 }
 
 double Machine::getNonRestrictedAmount() const {
@@ -323,7 +323,7 @@ double Machine::getNonRestrictedAmount() const {
 }
 
 void Machine::addNonRestrictedCredits(int credits) {
-    incrementMeter(sas::SASConstants::METER_CURRENT_NON_REST_CRD, credits);
+    incrementMeter(sas::SASConstants::METER_TOTAL_NONREST_PLAYED, credits);
 }
 
 void Machine::addNonRestrictedCredits(double dollarAmount) {
@@ -532,7 +532,7 @@ int64_t Machine::getNonRestrictedCreditsByGameDenom() const {
     if (!currentGame_) {
         return 0;
     }
-    return static_cast<int64_t>((getAccountingDenom() * getMeter(sas::SASConstants::METER_CURRENT_NON_REST_CRD)) /
+    return static_cast<int64_t>((getAccountingDenom() * getMeter(sas::SASConstants::METER_TOTAL_NONREST_PLAYED)) /
                                 currentGame_->getDenom());
 }
 

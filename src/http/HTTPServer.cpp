@@ -2,6 +2,7 @@
 #include "simulator/Game.h"
 #include "sas/SASConstants.h"
 #include "http/HTTPServer.h"
+#include "config/MeterPersistence.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -244,6 +245,9 @@ std::string HTTPServer::handleRequest(const std::string& request) {
     else if (req.method == "GET" && req.path == "/api/exceptions") {
         return buildResponse(200, "application/json", handleGET_Exceptions());
     }
+    else if (req.method == "GET" && req.path == "/api/meters") {
+        return buildResponse(200, "application/json", handleGET_Meters());
+    }
     else if (req.method == "POST" && req.path == "/api/play") {
         return buildResponse(200, "application/json", handlePOST_Play(req.body));
     }
@@ -258,6 +262,9 @@ std::string HTTPServer::handleRequest(const std::string& request) {
     }
     else if (req.method == "POST" && req.path == "/api/billinsert") {
         return buildResponse(200, "application/json", handlePOST_BillInsert(req.body));
+    }
+    else if (req.method == "POST" && req.path == "/api/reboot") {
+        return buildResponse(200, "application/json", handlePOST_Reboot(req.body));
     }
     // Static files
     else if (req.method == "GET") {
@@ -334,6 +341,89 @@ std::string HTTPServer::handleGET_Exceptions() {
     json << "{\"code\":81,\"name\":\"Game Tilt\"},";
     json << "{\"code\":82,\"name\":\"Power Off/On\"}";
     json << "]}";
+    return json.str();
+}
+
+std::string HTTPServer::handleGET_Meters() {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+    std::ostringstream json;
+    json << "{";
+    json << "\"mainMeters\":{";
+
+    // Return live METER_* values ONLY (never use mD*/gCI* persistence codes in runtime)
+    // All meters now use METER_* codes from the 0x00-0xFF (SAS spec) or 0x100+ (extended) ranges
+
+    // Machine meters - Doors (use extended METER_* codes in 0x100+ range)
+    json << "\"coinDrop\":" << machine_->getMeter(sas::SASConstants::METER_COIN_DROP) << ",";
+    json << "\"slotDoor\":" << machine_->getMeter(sas::SASConstants::METER_SLOT_DOOR) << ",";
+    json << "\"dropDoor\":" << machine_->getMeter(sas::SASConstants::METER_DROP_DOOR) << ",";
+    json << "\"logicDoor\":" << machine_->getMeter(sas::SASConstants::METER_LOGIC_DOOR) << ",";
+    json << "\"cashDoor\":" << machine_->getMeter(sas::SASConstants::METER_CASH_DOOR) << ",";
+    json << "\"auxFillDoor\":" << machine_->getMeter(sas::SASConstants::METER_AUX_FILL_DOOR) << ",";
+    json << "\"actualSlotDoor\":" << machine_->getMeter(sas::SASConstants::METER_ACTUAL_SLOT_DOOR) << ",";
+    json << "\"chassisDoor\":" << machine_->getMeter(sas::SASConstants::METER_CHASSIS_DOOR) << ",";
+
+    // Machine meters - Bill denoms (use live METER_* codes)
+    json << "\"billsIn1\":" << machine_->getMeter(sas::SASConstants::METER_1_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn2\":0,";  // No METER_2_BILLS_ACCEPTED in SAS protocol
+    json << "\"billsIn5\":" << machine_->getMeter(sas::SASConstants::METER_5_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn10\":" << machine_->getMeter(sas::SASConstants::METER_10_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn20\":" << machine_->getMeter(sas::SASConstants::METER_20_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn50\":" << machine_->getMeter(sas::SASConstants::METER_50_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn100\":" << machine_->getMeter(sas::SASConstants::METER_100_BILLS_ACCEPTED) << ",";
+    json << "\"billsIn200\":0,";  // No METER_200_BILLS_ACCEPTED in SAS protocol
+    json << "\"billsIn500\":0,";  // No METER_500_BILLS_ACCEPTED in SAS protocol
+    json << "\"billsIn1000\":0,"; // No METER_1000_BILLS_ACCEPTED in SAS protocol
+
+    // Machine meters - Credits and coins (use METER_* codes: SAS or extended)
+    json << "\"credits\":" << machine_->getMeter(sas::SASConstants::METER_CURRENT_CRD) << ",";
+    json << "\"trueCoinIn\":" << machine_->getMeter(sas::SASConstants::METER_TRUE_COIN_IN) << ",";
+    json << "\"trueCoinOut\":" << machine_->getMeter(sas::SASConstants::METER_TRUE_COIN_OUT) << ",";
+    json << "\"billDrop\":" << machine_->getMeter(sas::SASConstants::METER_CRD_FR_BILL_ACCEPTOR) << ",";
+    json << "\"totalHandPay\":" << machine_->getMeter(sas::SASConstants::METER_HANDPAID_CANCELLED_CRD) << ",";
+    json << "\"actualCoinDrop\":" << machine_->getMeter(sas::SASConstants::METER_ACTUAL_COIN_DROP) << ",";
+    json << "\"handPaidCancelledCredits\":" << machine_->getMeter(sas::SASConstants::METER_HANDPAID_CANCELLED_CRD) << ",";
+    json << "\"physicalCoinInValue\":" << machine_->getMeter(sas::SASConstants::METER_PHYS_COIN_IN_DOLLAR_VALUE) << ",";
+    json << "\"physicalCoinOutValue\":" << machine_->getMeter(sas::SASConstants::METER_PHYS_COIN_OUT_DOLLAR_VALUE) << ",";
+    json << "\"totalDrop\":" << machine_->getMeter(sas::SASConstants::METER_TOT_DROP) << ",";
+    json << "\"voucherTicketDrop\":" << machine_->getMeter(sas::SASConstants::METER_VOUCHER_TICKET_DROP) << ",";
+    json << "\"ncepCredits\":" << machine_->getMeter(sas::SASConstants::METER_NCEP_CREDITS) << ",";
+
+    // Machine meters - AFT (use SAS METER_* codes)
+    json << "\"aftCashableToGame\":" << machine_->getMeter(sas::SASConstants::METER_AFT_CASHABLE_IN) << ",";
+    json << "\"aftRestrictedToGame\":" << machine_->getMeter(sas::SASConstants::METER_AFT_REST_IN) << ",";
+    json << "\"aftNonRestrictedToGame\":" << machine_->getMeter(sas::SASConstants::METER_AFT_IN) << ",";
+    json << "\"aftCashableToHost\":" << machine_->getMeter(sas::SASConstants::METER_AFT_CASHABLE_OUT) << ",";
+    json << "\"aftRestrictedToHost\":" << machine_->getMeter(sas::SASConstants::METER_AFT_REST_OUT) << ",";
+    json << "\"aftNonRestrictedToHost\":" << machine_->getMeter(sas::SASConstants::METER_AFT_OUT) << ",";
+    json << "\"aftDebitToGame\":" << machine_->getMeter(sas::SASConstants::METER_AFT_DEBIT_XFER_TO_GAME_VALUE) << ",";
+
+    // Machine meters - Bonus and Progressive (use SAS METER_* codes)
+    json << "\"bonusMachinePayout\":" << machine_->getMeter(sas::SASConstants::METER_MACH_PAID_EXT_BONUS) << ",";
+    json << "\"bonusAttendantPayout\":" << machine_->getMeter(sas::SASConstants::METER_ATT_PAID_EXT_BONUS) << ",";
+    json << "\"progressiveAttendantPayout\":" << machine_->getMeter(sas::SASConstants::METER_ATT_PAID_PROG) << ",";
+    json << "\"progressiveMachinePayout\":" << machine_->getMeter(sas::SASConstants::METER_MACH_PAID_PROG) << ",";
+
+    // Machine meters - Special (use SAS or extended METER_* codes)
+    json << "\"restrictedPlayed\":" << machine_->getMeter(sas::SASConstants::METER_TOTAL_REST_PLAYED) << ",";
+    json << "\"unrestrictedPlayed\":" << machine_->getMeter(sas::SASConstants::METER_TOTAL_NONREST_PLAYED) << ",";
+    json << "\"gameWeightedTheoretical\":" << machine_->getMeter(sas::SASConstants::METER_WTPP) << ",";
+
+    // Game meters (base game - use SAS METER_* codes)
+    json << "\"coinIn\":" << machine_->getMeter(sas::SASConstants::METER_COIN_IN) << ",";
+    json << "\"coinOut\":" << machine_->getMeter(sas::SASConstants::METER_COIN_OUT) << ",";
+    json << "\"gamesPlayed\":" << machine_->getMeter(sas::SASConstants::METER_GAMES_PLAYED) << ",";
+    json << "\"gamesWon\":" << machine_->getMeter(sas::SASConstants::METER_GAMES_WON) << ",";
+    json << "\"maxCoinBet\":" << machine_->getMeter(sas::SASConstants::METER_MAX_COIN_BET) << ",";
+    json << "\"cancelledCredits\":" << machine_->getMeter(sas::SASConstants::METER_CANCELLED_CRD) << ",";
+    json << "\"bonusWon\":" << machine_->getMeter(sas::SASConstants::METER_BONUS_WON) << ",";
+    json << "\"jackpot\":" << machine_->getMeter(sas::SASConstants::METER_JACKPOT) << ",";
+    json << "\"progressiveCoinIn\":" << machine_->getMeter(sas::SASConstants::METER_PROGRESSIVE_COIN_IN);
+
+    json << "}";
+    json << "}";
+
     return json.str();
 }
 
@@ -446,6 +536,7 @@ std::string HTTPServer::handlePOST_BillInsert(const std::string& body) {
         machine_->addCredits(amount);
 
         // Update bill acceptor meters based on denomination
+        // Use METER_* live runtime codes for runtime operations
         int billValue = static_cast<int>(amount);
         switch (billValue) {
             case 1:
@@ -478,6 +569,36 @@ std::string HTTPServer::handlePOST_BillInsert(const std::string& body) {
          << "\"credits\":" << (machine_->getCredits() / 100.0) << ","
          << "\"success\":true"
          << "}";
+    return json.str();
+}
+
+std::string HTTPServer::handlePOST_Reboot(const std::string& body) {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+    // Save meters before reboot
+    std::cout << "[HTTP] Reboot requested - saving meters..." << std::endl;
+    config::MeterPersistence::saveMeters(machine_);
+
+    // Return success response
+    std::ostringstream json;
+    json << "{"
+         << "\"success\":true,"
+         << "\"message\":\"Meters saved. Rebooting system...\""
+         << "}";
+
+    // Schedule reboot after response is sent
+    // Note: In production, you would call system("reboot") here
+    // For now, we'll just log it
+    std::thread([]() {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::cout << "[HTTP] Executing system reboot..." << std::endl;
+#ifdef ZEUS_OS
+    system("sync && /sbin/reboot -f");
+#else
+        std::cout << "[HTTP] Reboot command (simulated - not rebooting in dev mode)" << std::endl;
+#endif
+    }).detach();
+
     return json.str();
 }
 

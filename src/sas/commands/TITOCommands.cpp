@@ -3,6 +3,8 @@
 #include "sas/SASConstants.h"
 #include <ctime>
 #include <cstring>
+#include <iostream>
+#include <iomanip>
 
 
 namespace sas {
@@ -68,48 +70,89 @@ Message TITOCommands::handleSendEnhancedValidation(simulator::Machine* machine) 
 
 Message TITOCommands::handleRedeemTicket(simulator::Machine* machine,
                                         const std::vector<uint8_t>& data) {
-    if (!machine || data.size() < 13) {
-        // Need at least 8 bytes validation + 5 bytes amount
+    // 0x7D is actually "Send Enabled Game Numbers" - master sends location/casino config data
+    // Format: [length][hostID 2B][expiration][locationLen][location...][addr1Len][addr1...][addr2Len][addr2...][CRC]
+    // Expected response: [addr][7D][status][CRC]
+
+    if (!machine || data.empty()) {
         return Message();
     }
 
-    // Extract validation number (first 8 bytes)
-    std::vector<uint8_t> validationNumber(data.begin(), data.begin() + 8);
+    // Parse the configuration data (first byte is length field)
+    if (data.size() < 1) {
+        return Message();
+    }
 
-    // Extract amount (next 5 bytes BCD)
-    uint64_t amount = BCD::decode(data.data() + 8, 5);
+    uint8_t length = data[0];
 
+    // Validate we have enough data
+    if (data.size() < static_cast<size_t>(length + 3)) {  // length + data + CRC(2)
+        // Not enough data yet - this shouldn't happen with smart reading
+        return Message();
+    }
+
+    // Extract fields from the configuration data
+    size_t offset = 1;  // Start after length byte
+
+    // Host ID (2 bytes)
+    if (offset + 2 > data.size()) return Message();
+    uint16_t hostID = (data[offset] << 8) | data[offset + 1];
+    offset += 2;
+
+    // Expiration (1 byte)
+    if (offset + 1 > data.size()) return Message();
+    uint8_t expiration = data[offset];
+    offset += 1;
+
+    // Location length and data
+    if (offset + 1 > data.size()) return Message();
+    uint8_t locationLen = data[offset];
+    offset += 1;
+
+    std::string location;
+    if (locationLen > 0) {
+        if (offset + locationLen > data.size()) return Message();
+        location = std::string(data.begin() + offset, data.begin() + offset + locationLen);
+        offset += locationLen;
+    }
+
+    // Address1 length and data
+    if (offset + 1 > data.size()) return Message();
+    uint8_t addr1Len = data[offset];
+    offset += 1;
+
+    std::string address1;
+    if (addr1Len > 0) {
+        if (offset + addr1Len > data.size()) return Message();
+        address1 = std::string(data.begin() + offset, data.begin() + offset + addr1Len);
+        offset += addr1Len;
+    }
+
+    // Address2 length and data
+    if (offset + 1 > data.size()) return Message();
+    uint8_t addr2Len = data[offset];
+    offset += 1;
+
+    std::string address2;
+    if (addr2Len > 0) {
+        if (offset + addr2Len > data.size()) return Message();
+        address2 = std::string(data.begin() + offset, data.begin() + offset + addr2Len);
+        offset += addr2Len;
+    }
+
+    // Log the configuration data received
+    std::cout << "[0x7D Config] Host ID: 0x" << std::hex << hostID << std::dec << std::endl;
+    std::cout << "[0x7D Config] Expiration: " << (int)expiration << " days" << std::endl;
+    std::cout << "[0x7D Config] Location: " << location << std::endl;
+    std::cout << "[0x7D Config] Address1: " << address1 << std::endl;
+    std::cout << "[0x7D Config] Address2: " << address2 << std::endl;
+
+    // Build simple ACK response: [addr][cmd][status][CRC]
+    // Status byte: 0x01 = acknowledged/accepted
     Message response;
     response.address = 1;
     response.command = LongPoll::REDEEM_TICKET;
-
-    // Validate ticket
-    bool valid = validateTicketRedemption(validationNumber);
-
-    if (valid && amount > 0) {
-        // Redeem ticket - add credits to machine
-        machine->addCredits(static_cast<int64_t>(amount));
-
-        // Response: Transfer status (0x00 = success)
-        response.data.push_back(0x00);  // Full transfer
-
-        // Echo validation number
-        response.data.insert(response.data.end(), validationNumber.begin(), validationNumber.end());
-
-        // Echo amount
-        std::vector<uint8_t> amountBCD = BCD::encode(amount, 5);
-        response.data.insert(response.data.end(), amountBCD.begin(), amountBCD.end());
-
-        // Parsing code (0x00 = valid)
-        response.data.push_back(0x00);
-    } else {
-        // Invalid ticket
-        response.data.push_back(0x80);  // Transfer failed
-        response.data.insert(response.data.end(), validationNumber.begin(), validationNumber.end());
-        std::vector<uint8_t> zeroBCD = BCD::encode(0, 5);
-        response.data.insert(response.data.end(), zeroBCD.begin(), zeroBCD.end());
-        response.data.push_back(0xFF);  // Invalid validation number
-    }
+    response.data.push_back(0x01);  // Status: accepted
 
     return response;
 }

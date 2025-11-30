@@ -41,10 +41,14 @@ COMMON_OBJ=$(OUTDIR)/EventService.o \
 	$(OUTDIR)/EnableCommands.o \
 	$(OUTDIR)/ExceptionCommands.o \
 	$(OUTDIR)/DateTimeCommands.o \
+	$(OUTDIR)/ConfigCommands.o \
 	$(OUTDIR)/TITOCommands.o \
 	$(OUTDIR)/AFTCommands.o \
 	$(OUTDIR)/ProgressiveCommands.o \
 	$(OUTDIR)/HTTPServer.o \
+	$(OUTDIR)/EGMConfig.o \
+	$(OUTDIR)/RapidJsonHelper.o \
+	$(OUTDIR)/MeterPersistence.o \
 	$(OUTDIR)/main.o
 
 # Platform-specific sources
@@ -85,6 +89,10 @@ $(OUTDIR)/%.o : src/sas/commands/%.cpp
 
 # Pattern rules for http directory
 $(OUTDIR)/%.o : src/http/%.cpp
+	$(COMPILE)
+
+# Pattern rules for config directory
+$(OUTDIR)/%.o : src/config/%.cpp
 	$(COMPILE)
 
 # Build rules

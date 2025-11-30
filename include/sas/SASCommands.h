@@ -75,11 +75,12 @@ constexpr uint8_t SEND_TICKET_INFO = 0x7E;          // Ticket information
 constexpr uint8_t SEND_TICKET_VALIDATION_DATA = 0x7F; // Ticket validation
 
 // --- Progressive Jackpots ---
-constexpr uint8_t SEND_PROGRESSIVE_AMOUNT = 0x51;   // Current progressive amount
-constexpr uint8_t SEND_PROGRESSIVE_WIN = 0x52;      // Progressive win amount
-constexpr uint8_t SEND_PROGRESSIVE_LEVELS = 0x53;   // Progressive level info
-constexpr uint8_t SEND_MULTIPLE_PROGRESSIVE_LEVELS = 0x54; // Multiple levels
-constexpr uint8_t SEND_PROGRESSIVE_BROADCAST = 0x5A; // Broadcast progressive values
+// NOTE: These are placeholder values - actual progressive commands are in 0x80+ range
+// The real 0x51-0x53 are game configuration commands, not progressive
+constexpr uint8_t SEND_PROGRESSIVE_AMOUNT = 0x80;   // Current progressive amount (placeholder)
+constexpr uint8_t SEND_PROGRESSIVE_WIN = 0x84;      // Progressive win amount (placeholder)
+constexpr uint8_t SEND_PROGRESSIVE_LEVELS = 0x85;   // Progressive level info (placeholder)
+constexpr uint8_t SEND_PROGRESSIVE_BROADCAST = 0x86; // Broadcast progressive values (placeholder)
 
 // --- Real-Time Event Reporting ---
 constexpr uint8_t ENABLE_REAL_TIME_EVENTS = 0x1D;   // Enable event reporting
@@ -91,10 +92,13 @@ constexpr uint8_t SEND_EEPROM_DATA = 0x21;          // EEPROM data
 
 // --- Date/Time ---
 constexpr uint8_t SEND_DATE_TIME = 0x1B;            // Send current date/time
-constexpr uint8_t SET_DATE_TIME = 0x20;             // Set machine date/time
+
+// --- Additional Meters ---
+constexpr uint8_t SEND_TOTAL_BILLS = 0x20;          // Send total bills (bill drop in dollars)
 
 // --- Machine Status ---
 constexpr uint8_t SEND_MACHINE_ID = 0x2E;           // Machine ID and info
+constexpr uint8_t SEND_MACHINE_ID_AND_SERIAL = 0x54; // Gaming Machine ID and Serial Number
 constexpr uint8_t SEND_CASHABLE_AMOUNT = 0x6F;      // Current cashable credits
 constexpr uint8_t SEND_RESTRICTED_AMOUNT = 0x6D;    // Restricted credits
 constexpr uint8_t SEND_NONRESTRICTED_AMOUNT = 0x6E; // Non-restricted credits
@@ -232,9 +236,10 @@ const char* getCommandName(uint8_t command);
 
 /**
  * Check if command is a general poll
+ * Note: 0xA0 and 0xAF are excluded as they're long polls with data
  */
 inline bool isGeneralPoll(uint8_t command) {
-    return (command >= 0x80 && command <= 0x9F);
+    return (command >= 0x80 && command <= 0x9F && command != 0xA0 && command != 0xAF);
 }
 
 /**

@@ -71,19 +71,47 @@ constexpr int SASConstants::METER_CRD_FR_COIN_TO_DROP;
 constexpr int SASConstants::METER_CRD_FR_BILL_ACCEPTOR;
 constexpr int SASConstants::METER_CURRENT_CRD;
 constexpr int SASConstants::METER_TOT_TKT_IN;
-constexpr int SASConstants::METER_TICKET_OUT;
 constexpr int SASConstants::METER_TOT_TKT_OUT;
 constexpr int SASConstants::METER_TOT_DROP;
-constexpr int SASConstants::METER_REG_CASH_TKT_IN;
+constexpr int SASConstants::METER_REST_TKT_OUT;
+constexpr int SASConstants::METER_TOT_TKT_IN_QTY;
+constexpr int SASConstants::METER_TOT_TKT_OUT_QTY;
+constexpr int SASConstants::METER_REST_TKT_IN_QTY;
+constexpr int SASConstants::METER_REG_CASHABLE_TKT_IN;
 constexpr int SASConstants::METER_REST_PROMO_TKT_IN;
+constexpr int SASConstants::METER_TOTAL_NONREST_PLAYED;
+
+// Bill acceptor aliases
 constexpr int SASConstants::METER_1_BILLS_ACCEPTED;
+constexpr int SASConstants::METER_2_BILLS_ACCEPTED;
 constexpr int SASConstants::METER_5_BILLS_ACCEPTED;
 constexpr int SASConstants::METER_10_BILLS_ACCEPTED;
 constexpr int SASConstants::METER_20_BILLS_ACCEPTED;
 constexpr int SASConstants::METER_50_BILLS_ACCEPTED;
 constexpr int SASConstants::METER_100_BILLS_ACCEPTED;
-constexpr int SASConstants::METER_AFT_IN;
-constexpr int SASConstants::METER_AFT_OUT;
+constexpr int SASConstants::METER_200_BILLS_ACCEPTED;
+constexpr int SASConstants::METER_500_BILLS_ACCEPTED;
+constexpr int SASConstants::METER_1000_BILLS_ACCEPTED;
+
+// Extended METER_* codes (0x100+)
+constexpr int SASConstants::METER_COIN_DROP;
+constexpr int SASConstants::METER_SLOT_DOOR;
+constexpr int SASConstants::METER_DROP_DOOR;
+constexpr int SASConstants::METER_LOGIC_DOOR;
+constexpr int SASConstants::METER_CASH_DOOR;
+constexpr int SASConstants::METER_AUX_FILL_DOOR;
+constexpr int SASConstants::METER_ACTUAL_SLOT_DOOR;
+constexpr int SASConstants::METER_CHASSIS_DOOR;
+constexpr int SASConstants::METER_TRUE_COIN_IN;
+constexpr int SASConstants::METER_TRUE_COIN_OUT;
+constexpr int SASConstants::METER_ACTUAL_COIN_DROP;
+constexpr int SASConstants::METER_PHYS_COIN_IN_DOLLAR_VALUE;
+constexpr int SASConstants::METER_PHYS_COIN_OUT_DOLLAR_VALUE;
+constexpr int SASConstants::METER_VOUCHER_TICKET_DROP;
+constexpr int SASConstants::METER_NCEP_CREDITS;
+constexpr int SASConstants::METER_MAX_COIN_BET;
+constexpr int SASConstants::METER_BONUS_WON;
+constexpr int SASConstants::METER_PROGRESSIVE_COIN_IN;
 
 } // namespace sas
 

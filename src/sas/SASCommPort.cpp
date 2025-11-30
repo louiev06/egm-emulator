@@ -4,12 +4,15 @@
 #include "sas/commands/EnableCommands.h"
 #include "sas/commands/ExceptionCommands.h"
 #include "sas/commands/DateTimeCommands.h"
+#include "sas/commands/ConfigCommands.h"
 #include "simulator/Machine.h"
 #include "sas/commands/TITOCommands.h"
 #include "sas/commands/AFTCommands.h"
 #include "sas/commands/ProgressiveCommands.h"
+#include "utils/Logger.h"
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 
 namespace sas {
@@ -41,21 +44,21 @@ bool SASCommPort::start() {
 
     // Open channel if not already open
     if (!channel_->isOpen()) {
-        std::cout << "[SAS] Opening serial channel..." << std::endl;
+        utils::Logger::log("[SAS] Opening serial channel...");
         if (!channel_->open()) {
-            std::cout << "[SAS] ERROR: Failed to open serial channel!" << std::endl;
+            utils::Logger::log("[SAS] ERROR: Failed to open serial channel!");
             return false;
         }
-        std::cout << "[SAS] Serial channel opened successfully" << std::endl;
+        utils::Logger::log("[SAS] Serial channel opened successfully");
     } else {
-        std::cout << "[SAS] Serial channel already open" << std::endl;
+        utils::Logger::log("[SAS] Serial channel already open");
     }
 
     // Start receive thread
-    std::cout << "[SAS] Starting receive thread..." << std::endl;
+    utils::Logger::log("[SAS] Starting receive thread...");
     running_ = true;
     receiveThread_ = std::thread(&SASCommPort::receiveThread, this);
-    std::cout << "[SAS] Receive thread started, waiting for data..." << std::endl;
+    utils::Logger::log("[SAS] Receive thread started, waiting for data...");
 
     return true;
 }
@@ -98,8 +101,20 @@ bool SASCommPort::sendMessage(const Message& msg) {
         return false;
     }
 
+    // Debug: Log the Message BEFORE serialize
+    {
+        std::stringstream ss;
+        ss << "[SAS TX PRE-SERIALIZE] Message: addr=0x" << std::hex << (int)msg.address
+           << " cmd=0x" << (int)msg.command << std::dec
+           << " data_size=" << msg.data.size();
+        utils::Logger::log(ss.str());
+    }
+
     // Serialize message (includes CRC calculation)
     std::vector<uint8_t> buffer = msg.serialize();
+
+    // Debug: Log what we're sending
+    utils::Logger::logHexVector("[SAS TX] Sending response: ", buffer);
 
     // Send to channel
     bool success = sendRaw(buffer.data(), buffer.size());
@@ -124,24 +139,55 @@ void SASCommPort::resetStatistics() {
 
 void SASCommPort::receiveThread() {
     static int readAttempts = 0;
+    utils::Logger::log("[SAS] Receive thread running, waiting for polls...");
+
     while (running_) {
-        // Read a message from the channel
+        // Read ONE poll at a time from the channel
         Message msg = readMessage(std::chrono::milliseconds(READ_TIMEOUT_MS));
 
         if (msg.command == 0) {
             // No message or timeout
             readAttempts++;
             if (readAttempts % 100 == 0) {
-                std::cout << "[SAS] Waiting for data... (" << readAttempts << " read attempts)" << std::endl;
+                utils::Logger::log("[SAS] Still waiting... (" + std::to_string(readAttempts) + " attempts)");
             }
             continue;
         }
         readAttempts = 0;  // Reset counter when we get data
 
-        // Check if message is for this address
-        if (msg.address != address_ && msg.address != 0) {
-            // Not for us, ignore
-            continue;
+        // Print what we received
+        {
+            std::stringstream ss;
+            ss << "\n===== RECEIVED POLL =====";
+            utils::Logger::log(ss.str());
+        }
+        {
+            std::stringstream ss;
+            ss << "Address: 0x" << std::hex << (int)msg.address << std::dec;
+            utils::Logger::log(ss.str());
+        }
+        {
+            std::stringstream ss;
+            ss << "Command: 0x" << std::hex << (int)msg.command << std::dec;
+            utils::Logger::log(ss.str());
+        }
+        utils::Logger::log("Data bytes: " + std::to_string(msg.data.size()));
+        if (!msg.data.empty()) {
+            std::stringstream ss;
+            ss << "Data: ";
+            for (size_t i = 0; i < msg.data.size(); i++) {
+                char hex[4];
+                snprintf(hex, sizeof(hex), "%02X ", msg.data[i]);
+                ss << hex;
+                if ((i + 1) % 16 == 0 && (i + 1) < msg.data.size()) {
+                    utils::Logger::log(ss.str());
+                    ss.str("");
+                    ss << "      ";
+                }
+            }
+            if (!ss.str().empty()) {
+                utils::Logger::log(ss.str());
+            }
         }
 
         // Update statistics
@@ -156,24 +202,35 @@ void SASCommPort::receiveThread() {
             }
         }
 
-        // Process message and get response
-        std::cout << "[SAS] Processing message..." << std::endl;
+        // Send response to keep master happy
         Message response = processMessage(msg);
-
-        // Send response if there is one
         if (response.command != 0) {
-            std::cout << "[SAS TX] Sending response, command: 0x" << std::hex << (int)response.command << std::dec << std::endl;
+            std::stringstream ss;
+            ss << "Sending response: 0x" << std::hex << (int)response.command << std::dec;
+            utils::Logger::log(ss.str());
             sendMessage(response);
         } else {
-            std::cout << "[SAS] No response needed for this message" << std::endl;
+            utils::Logger::log("No response (NULL ACK)");
         }
+
+        utils::Logger::log("==============================\n");
     }
 }
 
 Message SASCommPort::processMessage(const Message& msg) {
+    // Debug 0xA0 routing
+    if (msg.command == 0xA0) {
+        bool isGenPoll = isGeneralPoll(msg.command);
+        std::stringstream ss;
+        ss << "[SAS DEBUG] 0xA0 routing: isGeneralPoll()=" << (isGenPoll ? "TRUE" : "FALSE");
+        utils::Logger::log(ss.str());
+    }
+
     if (isGeneralPoll(msg.command)) {
+        utils::Logger::log("[SAS] Routing to handleGeneralPoll()");
         return handleGeneralPoll(msg);
     } else {
+        utils::Logger::log("[SAS] Routing to handleLongPoll()");
         return handleLongPoll(msg);
     }
 }
@@ -240,9 +297,101 @@ Message SASCommPort::handleLongPoll(const Message& msg) {
             response = commands::MeterCommands::handleSendMeters(machine_, msg.command);
             break;
 
-        // Selected meters
+        // 0x19: Send Total Coin In and Associated Meters (fixed format)
         case LongPoll::SEND_SELECTED_METERS:
-            response = commands::MeterCommands::handleSendSelectedMeters(machine_, msg.data);
+            response = commands::MeterCommands::handleSendTotalCoinInAndMeters(machine_);
+            break;
+
+        // 0x20: Send Total Bills
+        case LongPoll::SEND_TOTAL_BILLS:
+            response = commands::MeterCommands::handleSendTotalBills(machine_);
+            break;
+
+        // Phase 1 - Basic Meters (Simple 4-byte BCD responses)
+        case 0x10:  // Send Cancelled Credits
+            response = commands::MeterCommands::handleSendCancelledCredits(machine_);
+            break;
+
+        case 0x1A:  // Send Current Credits
+            response = commands::MeterCommands::handleSendCurrentCredits(machine_);
+            break;
+
+        case 0x1C:  // Send Gaming Machine Meters 1-8
+            response = commands::MeterCommands::handleSendGamingMachineMeters(machine_);
+            break;
+
+        case 0x1E:  // Send Bill Meters
+            response = commands::MeterCommands::handleSendBillMeters(machine_);
+            break;
+
+        case 0x2A:  // Send True Coin In
+            response = commands::MeterCommands::handleSendTrueCoinIn(machine_);
+            break;
+
+        case 0x2B:  // Send True Coin Out
+            response = commands::MeterCommands::handleSendTrueCoinOut(machine_);
+            break;
+
+        case 0x2D:  // Send Handpay Cancelled Credits
+            response = commands::MeterCommands::handleSendHandpayCancelledCredits(machine_, msg.data);
+            break;
+
+        case 0x2F:  // Send Selected Meters for Game N
+            response = commands::MeterCommands::handleSendSelectedMetersForGameN(machine_, msg.data);
+            break;
+
+        // Bill Denomination Meters
+        case 0x31:  // Send $1 Bills
+            response = commands::MeterCommands::handleSend$1Bills(machine_);
+            break;
+
+        case 0x32:  // Send $2 Bills
+            response = commands::MeterCommands::handleSend$2Bills(machine_);
+            break;
+
+        case 0x33:  // Send $5 Bills
+            response = commands::MeterCommands::handleSend$5Bills(machine_);
+            break;
+
+        case 0x34:  // Send $10 Bills
+            response = commands::MeterCommands::handleSend$10Bills(machine_);
+            break;
+
+        case 0x35:  // Send $20 Bills
+            response = commands::MeterCommands::handleSend$20Bills(machine_);
+            break;
+
+        case 0x36:  // Send $50 Bills
+            response = commands::MeterCommands::handleSend$50Bills(machine_);
+            break;
+
+        case 0x37:  // Send $100 Bills
+            response = commands::MeterCommands::handleSend$100Bills(machine_);
+            break;
+
+        case 0x38:  // Send $500 Bills
+            response = commands::MeterCommands::handleSend$500Bills(machine_);
+            break;
+
+        case 0x39:  // Send $1000 Bills
+            response = commands::MeterCommands::handleSend$1000Bills(machine_);
+            break;
+
+        case 0x3A:  // Send $200 Bills
+            response = commands::MeterCommands::handleSend$200Bills(machine_);
+            break;
+
+        case 0x46:  // Send Bills Accepted Credits
+            response = commands::MeterCommands::handleSendBillsAcceptedCredits(machine_);
+            break;
+
+        // AFT Meters
+        case 0x1D:  // Send AFT Registration Meters
+            response = commands::AFTCommands::handleSendAFTRegistrationMeters(machine_);
+            break;
+
+        case 0x27:  // Send Non-Cashable Electronic Promotion Credits
+            response = commands::AFTCommands::handleSendNonCashablePromoCredits(machine_);
             break;
 
         // Game number query
@@ -261,8 +410,41 @@ Message SASCommPort::handleLongPoll(const Message& msg) {
             response = commands::DateTimeCommands::handleSendDateTime(machine_);
             break;
 
-        case LongPoll::SET_DATE_TIME:
-            response = commands::DateTimeCommands::handleSetDateTime(machine_, msg.data);
+        // Machine ID and Serial Number
+        case LongPoll::SEND_MACHINE_ID_AND_SERIAL:
+            response = commands::ConfigCommands::handleSendMachineID(machine_);
+            break;
+
+        // Game Configuration Commands
+        case 0x51:  // Send Number of Games Implemented
+            response = commands::ConfigCommands::handleSendNumberOfGames(machine_);
+            break;
+
+        case 0x52:  // Send Selected Game Meters
+            response = commands::MeterCommands::handleSendSelectedGameMeters(machine_, msg.data);
+            break;
+
+        case 0x53:  // Send Game N Configuration
+            response = commands::ConfigCommands::handleSendGameNConfiguration(machine_, msg.data);
+            break;
+
+        case 0x55:  // Send Selected Game Number
+            response = commands::ConfigCommands::handleSendSelectedGameNumber(machine_);
+            break;
+
+        case 0x56:  // Send Enabled Game Numbers
+            response = commands::ConfigCommands::handleSendEnabledGameNumbers(machine_);
+            break;
+
+        case 0xA0:  // Enable/Disable Game N
+            response = commands::ConfigCommands::handleEnableDisableGameN(machine_, msg.data);
+            break;
+
+        // Variable-length meter commands with size bytes
+        case 0x6F:  // Send Selected Meters for Game N (Extended)
+        case 0xAF:  // Send Selected Meters for Game N (Alternate poll value)
+            utils::Logger::log("[SAS] Matched case 0x6F/0xAF, calling handler");
+            response = commands::MeterCommands::handleSendSelectedMetersForGameNExtended(machine_, msg.command, msg.data);
             break;
 
         // TITO (Ticket In/Ticket Out) commands
@@ -307,20 +489,20 @@ Message SASCommPort::handleLongPoll(const Message& msg) {
             response = commands::AFTCommands::handleInterrogateStatus(machine_);
             break;
 
-        // Progressive Jackpot commands
-        case LongPoll::SEND_PROGRESSIVE_AMOUNT:
+        // Progressive Jackpot commands (0x80+)
+        case 0x80:  // SEND_PROGRESSIVE_AMOUNT
             response = commands::ProgressiveCommands::handleSendProgressiveAmount(machine_, msg.data);
             break;
 
-        case LongPoll::SEND_PROGRESSIVE_WIN:
+        case 0x84:  // SEND_PROGRESSIVE_WIN
             response = commands::ProgressiveCommands::handleSendProgressiveWin(machine_, msg.data);
             break;
 
-        case LongPoll::SEND_PROGRESSIVE_LEVELS:
+        case 0x85:  // SEND_PROGRESSIVE_LEVELS
             response = commands::ProgressiveCommands::handleSendProgressiveLevels(machine_);
             break;
 
-        case LongPoll::SEND_PROGRESSIVE_BROADCAST:
+        case 0x86:  // SEND_PROGRESSIVE_BROADCAST
             response = commands::ProgressiveCommands::handleSendProgressiveBroadcast(machine_);
             break;
 
@@ -350,56 +532,51 @@ Message SASCommPort::readMessage(std::chrono::milliseconds timeout) {
         return msg;
     }
 
-    if (bytesRead < 4) {
+    // IMPORTANT: S7Lite API strips the address byte!
+    // Buffer format: cmd only (NO CRC on simple polls!)
+    // Minimum: 1 byte (just the command)
+    if (bytesRead < 1) {
         std::lock_guard<std::recursive_mutex> lock(statsMutex_);
         stats_.framingErrors++;
-        std::cout << "[SAS] Incomplete message: received only " << bytesRead << " byte(s), need at least 4" << std::endl;
         return msg;
     }
 
-    size_t totalBytesRead = static_cast<size_t>(bytesRead);
+    // Extract command (address was stripped by S7Lite API)
+    // We'll use the configured address from emulator
+    msg.address = address_;  // Use our configured address
+    msg.command = buffer[0];
 
-    // Extract address and command
-    msg.address = buffer[0];
-    msg.command = buffer[1];
+    // If there are additional bytes beyond the command, store them as data
+    // (Some polls like 0x74 have parameters)
+    if (bytesRead > 1) {
+        // Many SAS commands include a 2-byte CRC that needs to be stripped
+        // We need to check if this command includes CRC in the input
+        bool hasCRC = false;
+        switch (msg.command) {
+            // Variable-length commands with CRC
+            case 0x6F: case 0xAF:  // Send Selected Meters for Game N (Extended)
+            case 0x72: case 0x73: case 0x74: case 0x75: case 0x76:  // AFT commands
+            case 0x7B: case 0x7C: case 0x7D: case 0x7E: case 0x7F:  // Extended commands
+            // Fixed-length long polls with CRC
+            case 0xA0:  // Enable/Disable Game N
+            case 0x53:  // Send Game N Configuration
+            case 0x52:  // Send Selected Game Meters
+                hasCRC = true;
+                break;
+            default:
+                hasCRC = false;
+                break;
+        }
 
-    std::cout << "[SAS RX] Address: 0x" << std::hex << (int)buffer[0] << std::dec << std::endl;
-    std::cout << "[SAS RX] Command: 0x" << std::hex << (int)buffer[1] << std::dec << std::endl;
-
-    // Determine message length
-    size_t messageLength;
-    if (isGeneralPoll(msg.command)) {
-        // General poll is always exactly 4 bytes
-        messageLength = 4;
-    } else {
-        // Long poll - use all bytes we read
-        messageLength = totalBytesRead;
+        // Strip CRC (last 2 bytes) if this command includes it
+        int dataEnd = hasCRC ? (bytesRead - 2) : bytesRead;
+        if (dataEnd > 1) {
+            msg.data.assign(buffer + 1, buffer + dataEnd);
+        }
     }
 
-    // Verify CRC
-    std::cout << "[SAS RX] Message length: " << messageLength << " bytes, verifying CRC..." << std::endl;
-    std::cout << "[SAS RX] Message bytes: ";
-    for (size_t i = 0; i < messageLength; i++) {
-        printf("%02X ", buffer[i]);
-    }
-    std::cout << std::endl;
-
-    if (!CRC16::verify(buffer, messageLength)) {
-        std::lock_guard<std::recursive_mutex> lock(statsMutex_);
-        stats_.crcErrors++;
-        msg.command = 0;  // Invalidate message
-        std::cout << "[SAS] CRC error!" << std::endl;
-        return msg;
-    }
-    std::cout << "[SAS RX] CRC OK!" << std::endl;
-
-    // Extract data (if any)
-    if (messageLength > 4) {
-        size_t dataLength = messageLength - 4;  // Subtract addr, cmd, 2-byte CRC
-        msg.data.assign(buffer + 2, buffer + 2 + dataLength);
-    }
-
-    msg.crc = CRC16::extract(buffer, messageLength);
+    // No CRC on incoming polls from master
+    msg.crc = 0;
 
     return msg;
 }

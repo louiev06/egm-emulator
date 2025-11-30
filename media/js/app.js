@@ -14,6 +14,7 @@ class EGMEmulator {
         this.gameName = 'Zeus Lightning';
         this.isPlaying = false;
         this.ipAddress = 'Loading...';
+        this.lastDenomChange = 0;
 
         // Available denominations - will be loaded from backend
         this.denoms = [];
@@ -53,13 +54,18 @@ class EGMEmulator {
             btnDenomDown: document.getElementById('btnDenomDown'),
             btnException: document.getElementById('btnException'),
             btnBillInsert: document.getElementById('btnBillInsert'),
+            btnReboot: document.getElementById('btnReboot'),
             exceptionModal: document.getElementById('exceptionModal'),
             billModal: document.getElementById('billModal'),
+            rebootModal: document.getElementById('rebootModal'),
             exceptionGrid: document.getElementById('exceptionGrid'),
             closeExceptionModal: document.getElementById('closeExceptionModal'),
             closeBillModal: document.getElementById('closeBillModal'),
+            closeRebootModal: document.getElementById('closeRebootModal'),
             customBillAmount: document.getElementById('customBillAmount'),
-            btnCustomBill: document.getElementById('btnCustomBill')
+            btnCustomBill: document.getElementById('btnCustomBill'),
+            btnCancelReboot: document.getElementById('btnCancelReboot'),
+            btnConfirmReboot: document.getElementById('btnConfirmReboot')
         };
     }
 
@@ -70,10 +76,14 @@ class EGMEmulator {
         this.elements.btnDenomDown.addEventListener('click', () => this.changeDenom(-1));
         this.elements.btnException.addEventListener('click', () => this.showExceptionModal());
         this.elements.btnBillInsert.addEventListener('click', () => this.showBillModal());
+        this.elements.btnReboot.addEventListener('click', () => this.showRebootModal());
 
         // Modal close buttons
         this.elements.closeExceptionModal.addEventListener('click', () => this.hideExceptionModal());
         this.elements.closeBillModal.addEventListener('click', () => this.hideBillModal());
+        this.elements.closeRebootModal.addEventListener('click', () => this.hideRebootModal());
+        this.elements.btnCancelReboot.addEventListener('click', () => this.hideRebootModal());
+        this.elements.btnConfirmReboot.addEventListener('click', () => this.confirmReboot());
 
         // Custom bill insert
         this.elements.btnCustomBill.addEventListener('click', () => this.insertCustomBill());
@@ -187,7 +197,11 @@ class EGMEmulator {
                 const data = await response.json();
                 // Update state from polling data (but don't update status to avoid flicker)
                 if (data.credits !== undefined) this.credits = data.credits;
-                if (data.denom !== undefined) this.currentDenom = data.denom;
+                // Don't overwrite denom if we just changed it (wait 1 second for backend to update)
+                const timeSinceLastDenomChange = Date.now() - this.lastDenomChange;
+                if (data.denom !== undefined && timeSinceLastDenomChange > 1000) {
+                    this.currentDenom = data.denom;
+                }
                 if (data.gameName !== undefined) this.gameName = data.gameName;
                 // Don't update status from polling - only from user actions
                 this.updateDisplay();
@@ -276,6 +290,7 @@ class EGMEmulator {
         if (this.denomIndex >= this.denoms.length) this.denomIndex = this.denoms.length - 1;
 
         this.currentDenom = this.denoms[this.denomIndex];
+        this.lastDenomChange = Date.now();
 
         try {
             await fetch(`${this.apiBase}/denom`, {
@@ -369,6 +384,39 @@ class EGMEmulator {
 
     hideBillModal() {
         this.elements.billModal.classList.remove('active');
+    }
+
+    showRebootModal() {
+        this.elements.rebootModal.classList.add('active');
+    }
+
+    hideRebootModal() {
+        this.elements.rebootModal.classList.remove('active');
+    }
+
+    async confirmReboot() {
+        this.hideRebootModal();
+        this.setStatus('Saving meters and rebooting...');
+
+        try {
+            const response = await fetch(`${this.apiBase}/reboot`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.setStatus(data.message || 'Rebooting...');
+                // Disable all buttons during reboot
+                document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
+            } else {
+                this.setStatus('Reboot failed');
+            }
+        } catch (error) {
+            console.error('Reboot error:', error);
+            this.setStatus('Communication error');
+        }
     }
 
     async triggerException(exceptionCode) {

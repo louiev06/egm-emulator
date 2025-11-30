@@ -141,7 +141,7 @@ private:
     mutable std::recursive_mutex statsMutex_; // Statistics mutex
 
     static constexpr size_t MAX_MESSAGE_SIZE = 256;
-    static constexpr int READ_TIMEOUT_MS = 50;
+    static constexpr int READ_TIMEOUT_MS = 1000;  // 1 second - MCU can have long burst gaps (500ms+)
 };
 
 } // namespace sas

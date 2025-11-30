@@ -81,6 +81,14 @@ endif
 	mkdir -p ${SENTINEL_HOME}/media
 	cp -r media/* ${SENTINEL_HOME}/media/
 
+	# Configuration file (copy to both /opt/ncompass/bin and /sdboot for persistence)
+	cp egm-config.json ${SENTINEL_HOME}/bin/
+	mkdir -p ${ROOTFS}/sdboot
+	cp egm-config.json ${ROOTFS}/sdboot/
+
+	# API help file
+	cp apihelp.txt ${SENTINEL_HOME}/bin/apihelp
+
 	# Create image
 	rm -f ${DIST}/sentinel.img
 	rm -rf '$(TEMP_SQUASHFS_DIR)'

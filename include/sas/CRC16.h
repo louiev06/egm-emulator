@@ -10,14 +10,14 @@ namespace sas {
 /**
  * CRC16 - CRC-16 calculation for SAS protocol
  *
- * SAS protocol uses CRC-16 with the following parameters:
- * - Polynomial: 0x8005 (x^16 + x^15 + x^2 + 1)
- * - Initial value: 0x0000
- * - Final XOR: 0x0000
- * - Reflect input: false
- * - Reflect output: false
+ * Based on SAS Protocol 6.01 Section 5 - Cyclical Redundancy Check
+ * Uses nibble-based algorithm with CCITT polynomial x^16+x^12+x^5+1
  *
- * CRC is transmitted LSB first in SAS messages.
+ * SAS protocol uses CRC-16 with the following parameters:
+ * - Polynomial: 0x1081 (derived from x^16+x^12+x^5+1)
+ * - Initial value: 0x0000
+ * - Algorithm: Nibble-based (processes 4 bits at a time, LSB first)
+ * - Transmission: LSB first in SAS messages
  */
 class CRC16 {
 public:
@@ -53,21 +53,6 @@ public:
      * @return CRC value (LSB first format)
      */
     static uint16_t extract(const uint8_t* data, size_t length);
-
-private:
-    static constexpr uint16_t POLYNOMIAL = 0x8005;
-    static constexpr uint16_t INITIAL_VALUE = 0x0000;
-
-    /**
-     * Lookup table for faster CRC calculation
-     * Generated using polynomial 0x8005
-     */
-    static const uint16_t CRC_TABLE[256];
-
-    /**
-     * Initialize CRC lookup table
-     */
-    static void initTable();
 };
 
 } // namespace sas

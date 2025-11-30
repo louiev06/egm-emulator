@@ -70,6 +70,27 @@ public:
      */
     static Message handleInterrogateStatus(simulator::Machine* machine);
 
+    /**
+     * Handle "Send AFT Registration Meters" (0x1D)
+     * Returns AFT-related meters
+     * Response: [Addr][0x1D][Promo Credit In(4)][Non-Cash Credit In(4)]
+     *                      [Transferred Credits(4)][Cashable Credits(4)][CRC]
+     * Total: 20 bytes
+     * @param machine Machine instance
+     * @return Response with AFT meters
+     */
+    static Message handleSendAFTRegistrationMeters(simulator::Machine* machine);
+
+    /**
+     * Handle "Send Non-Cashable Electronic Promotion Credits" (0x27)
+     * Returns current NCEP credits on credit meter
+     * Response: [Addr][0x27][NCEP Credits(4 BCD)][CRC]
+     * Total: 8 bytes
+     * @param machine Machine instance
+     * @return Response with NCEP credits
+     */
+    static Message handleSendNonCashablePromoCredits(simulator::Machine* machine);
+
     // AFT Transfer Types
     enum TransferType {
         TRANSFER_TO_GAMING_MACHINE = 0x00,      // Host -> Game (credits in)
